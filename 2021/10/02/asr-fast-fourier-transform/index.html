@@ -24,7 +24,7 @@
 <meta property="og:description" content="Fourier SeriesAny periodic function can be rewritten in the Fourier-series form:  f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k\omega x)+b_k\sin(k\omega x))First, we need calculate the coefficient $A_0$  \in">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-10-02T04:48:35.593Z">
-<meta property="article:modified_time" content="2021-10-02T06:39:52.077Z">
+<meta property="article:modified_time" content="2021-10-02T06:44:12.453Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -269,9 +269,9 @@ a_k=\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omeg
 b_k=\frac{1}{Ti}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x</script><script type="math/tex; mode=display">
 b_k=-\frac{i}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x</script><p>Also, the original formula can be also rewritten</p>
 <script type="math/tex; mode=display">
-f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}(a_k\left(\exp(\frac{2\pi k\omega ix}{T})+\exp(-\frac{2\pi k\omega ix}{T})\right)+\frac{b_k}{i}\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right) ))</script><p>So,</p>
+f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}(a_k\left(\exp(\frac{2\pi k\omega ix}{T})+\exp(-\frac{2\pi k\omega ix}{T})\right)+\frac{b_k}{i}\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right) )</script><p>So,</p>
 <script type="math/tex; mode=display">
-f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2\pi k\omega ix}{T})\left(a_k+\frac{b_k}{i}\right)+\exp(-\frac{2\pi k\omega ix}{T})\left(a_k-\frac{b_k}{i}\right)\right)</script><script type="math/tex; mode=display">
+f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2 \pi k\omega ix}{T})\left(a_k+\frac{b_k}{i}\right)+\exp(-\frac{2\pi k\omega ix}{T})\left(a_k-\frac{b_k}{i}\right)\right)</script><script type="math/tex; mode=display">
 f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2\pi k\omega ix}{T})\left(a_k-ib_k\right)+\exp(-\frac{2\pi k\omega ix}{T})\left(a_k+ib_k\right)\right)</script><p>We can define new variable $c_k$ and $d_k$ to simplify the expression</p>
 <script type="math/tex; mode=display">
 c_k=a_k-ib_k; d_k=a_k+ib_k</script><p>Then,</p>
