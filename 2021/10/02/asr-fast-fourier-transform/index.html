@@ -24,7 +24,7 @@
 <meta property="og:description" content="Fourier SeriesAny periodic function can be rewritten in the Fourier-series form:  f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k x)+b_k\sin(k x))First, we need calculate the coefficient $A_0$  \int_{-\pi}^{\p">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-10-02T04:48:35.593Z">
-<meta property="article:modified_time" content="2021-10-02T08:55:04.136Z">
+<meta property="article:modified_time" content="2021-10-02T08:57:32.048Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -305,8 +305,13 @@ f(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}\exp(\omega it)F(\omega)\mathrm{d}\ome
 <script type="math/tex; mode=display">
 F(n)=\sum_{t=0}^{N-1}\exp(-\frac{2\pi n}{N}it)x_t</script><p>And its corresponding inverse transform (IDFT) can be described as the equation below.</p>
 <script type="math/tex; mode=display">
-f(t)=\frac{1}{N}\sum_{n=0}^{N-1}\exp(\frac{2\pi n}{N}it)F(n)</script><p>We can define the matrix of time domain as $X=(x<em>0,x_1,…,x_n)^T$​​, and the matrix of frequency domain as $Y=(X_1,…,X_n)^T$​​ 。DFT can be written in a matrix $W={a</em>{nt}}$​​</p>
+f(t)=\frac{1}{N}\sum_{n=0}^{N-1}\exp(\frac{2\pi n}{N}it)F(n)</script><p>We can define the matrix of time domain as</p>
 <script type="math/tex; mode=display">
+X=(x_0,x_1,...,x_n)^T</script><p> and the matrix of frequency domain as</p>
+<script type="math/tex; mode=display">
+Y=(X_1,...,X_n)^T</script><p>DFT can be written in a matrix</p>
+<script type="math/tex; mode=display">
+W={a_{nt}}</script><script type="math/tex; mode=display">
 a_{nt}=\exp(-\frac{2\pi n}{N}it)</script><p>Then, $Y$ can be calculated by</p>
 <script type="math/tex; mode=display">
 Y=WX</script><p>IDFT can also be written in a matrix form. $I=b_{tn}$</p>
