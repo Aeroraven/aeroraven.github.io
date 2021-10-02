@@ -16,15 +16,15 @@
   <meta name="description" content="">
   <meta name="author" content="John Doe">
   <meta name="keywords" content="">
-  <meta name="description" content="Fourier SeriesAny periodic function can be rewritten in the Fourier-series form:  f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k\omega x)+b_k\sin(k\omega x))First, we need calculate the coefficient $A_0$  \in">
+  <meta name="description" content="Fourier SeriesAny periodic function can be rewritten in the Fourier-series form:  f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k x)+b_k\sin(k x))First, we need calculate the coefficient $A_0$  \int_{-\pi}^{\p">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ASR: Fast Fourier Transformation">
 <meta property="og:url" content="http://example.com/2021/10/02/asr-fast-fourier-transform/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Fourier SeriesAny periodic function can be rewritten in the Fourier-series form:  f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k\omega x)+b_k\sin(k\omega x))First, we need calculate the coefficient $A_0$  \in">
+<meta property="og:description" content="Fourier SeriesAny periodic function can be rewritten in the Fourier-series form:  f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k x)+b_k\sin(k x))First, we need calculate the coefficient $A_0$  \int_{-\pi}^{\p">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-10-02T04:48:35.593Z">
-<meta property="article:modified_time" content="2021-10-02T06:44:12.453Z">
+<meta property="article:modified_time" content="2021-10-02T07:42:31.193Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -195,7 +195,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      3.9k 字
+      4.7k 字
     </span>
   
 
@@ -204,7 +204,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      12 分钟
+      15 分钟
     </span>
   
 
@@ -238,55 +238,68 @@
             <div class="markdown-body">
               <h2 id="Fourier-Series"><a href="#Fourier-Series" class="headerlink" title="Fourier Series"></a>Fourier Series</h2><p>Any periodic function can be rewritten in the Fourier-series form:</p>
 <script type="math/tex; mode=display">
-f(x)=A_0+\sum_{k=1}^{\infty}(a_k\cos(k\omega x)+b_k\sin(k\omega x))</script><p>First, we need calculate the coefficient $A_0$</p>
+f(x)=A_0+\sum_{k=1}^{\infty}(a_k\cos(k x)+b_k\sin(k x))</script><p>First, we need calculate the coefficient $A_0$</p>
 <script type="math/tex; mode=display">
-\int_{-\pi}^{\pi}f(x)\mathrm{d}x=2\pi A_0+\sum_{k=1}^{\infty}(\int_{-\pi}^{\pi}a_k\cos(k\omega x)\mathrm{d}x+\int_{-\pi}^{\pi}b_k\sin(k\omega x)\mathrm{d}x)=2\pi A_0</script><p>Thus,</p>
+\int_{-\pi}^{\pi}f(x)\mathrm{d}x=2\pi A_0+\sum_{k=1}^{\infty}(\int_{-\pi}^{\pi}a_k\cos(k x)\mathrm{d}x+\int_{-\pi}^{\pi}b_k\sin(k x)\mathrm{d}x)=2\pi A_0</script><p>Thus,</p>
 <script type="math/tex; mode=display">
 A_0=\frac{1}{2\pi}\int_{-\pi}^{\pi}f(x)\mathrm{d}x</script><p>Next, calculate the coefficients $a_k$</p>
 <script type="math/tex; mode=display">
-\int_{-\pi}^{\pi}f(x)\cos(n\omega x)\mathrm{d}x=\int_{-\pi}^{\pi}A_0\cos(n\omega x)\mathrm{d}x+\sum_{k=1}^{\infty}(\int_{-\pi}^{\pi}a_k\cos(k\omega x)\cos(n\omega x)\mathrm{d}x+\int_{-\pi}^{\pi}b_k\sin(k\omega x)\cos(n\omega x)\mathrm{d}x)=2\pi A_0</script><p>Simplify the equation above.</p>
+\int_{-\pi}^{\pi}f(x)\cos(n x)\mathrm{d}x=\int_{-\pi}^{\pi}A_0\cos(n x)\mathrm{d}x+\sum_{k=1}^{\infty}(\int_{-\pi}^{\pi}a_k\cos(k x)\cos(n x)\mathrm{d}x+\int_{-\pi}^{\pi}b_k\sin(k x)\cos(n x)\mathrm{d}x)=2\pi A_0</script><p>Simplify the equation above.</p>
 <script type="math/tex; mode=display">
-\int_{-\pi}^{\pi}f(x)\cos(n\omega x)\mathrm{d}x=\int_{-\pi}^{\pi}a_n\cos^2(n\omega x)\mathrm{d}x=\int_{-\pi}^{\pi}a_n(\frac{1+cos(2n\omega x)}{2})\mathrm{d}x=a_n\pi</script><p>Thus,</p>
+\int_{-\pi}^{\pi}f(x)\cos(n x)\mathrm{d}x=\int_{-\pi}^{\pi}a_n\cos^2(n x)\mathrm{d}x=\int_{-\pi}^{\pi}a_n(\frac{1+cos(2n x)}{2})\mathrm{d}x=a_n\pi</script><p>Thus,</p>
 <script type="math/tex; mode=display">
-a_k=\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\cos(k\omega x)\mathrm{d}x</script><p>Similarly, we can get</p>
+a_k=\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\cos(k x)\mathrm{d}x</script><p>Similarly, we can get</p>
 <script type="math/tex; mode=display">
-b_k=\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\sin(k\omega x)\mathrm{d}x</script><p>Assuming the period of the function is $T$​, we can convert it into a new function with period of $2\pi$</p>
+b_k=\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\sin(k x)\mathrm{d}x</script><p>Assuming the period of the function is $T$​, we can convert it into a new function with period of $2\pi$</p>
 <script type="math/tex; mode=display">
 t=\frac{2\pi x}{T}; f(x)=f(\frac{2\pi x}{T})=g(t)</script><p>Then,</p>
 <script type="math/tex; mode=display">
-f(x)=g(t)=\frac{a_0}{2}+\sum_{k=1}^{\infty}(a_k\cos(\frac{2\pi k\omega x}{T} )+b_k\sin(\frac{2\pi k\omega x}{T} ))</script><p>Where,</p>
+f(x)=g(t)=\frac{a_0}{2}+\sum_{k=1}^{\infty}(a_k\cos(\frac{2\pi k x}{T} )+b_k\sin(\frac{2\pi k x}{T} ))</script><p>Where,</p>
 <script type="math/tex; mode=display">
 a_0=\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\mathrm{d}t=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\mathrm{d}x</script><script type="math/tex; mode=display">
-a_k=\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\cos(k\omega x)\mathrm{d}t=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\cos(\frac{2\pi k\omega x}{T})\mathrm{d}x</script><script type="math/tex; mode=display">
-b_k=\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\sin(k\omega x)\mathrm{d}t=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\sin(\frac{2\pi k\omega x}{T})\mathrm{d}x</script><h2 id="Fourier-Series-in-the-Complex-Form"><a href="#Fourier-Series-in-the-Complex-Form" class="headerlink" title="Fourier Series in the Complex Form"></a>Fourier Series in the Complex Form</h2><p>According to the Euler‘s Formula, we can convert trigonometric functions into corresponding complex forms.</p>
+a_k=\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\cos(k x)\mathrm{d}t=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\cos(\frac{2\pi k x}{T})\mathrm{d}x</script><script type="math/tex; mode=display">
+b_k=\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\sin(k x)\mathrm{d}t=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\sin(\frac{2\pi k x}{T})\mathrm{d}x</script><h2 id="Fourier-Series-in-the-Complex-Form"><a href="#Fourier-Series-in-the-Complex-Form" class="headerlink" title="Fourier Series in the Complex Form"></a>Fourier Series in the Complex Form</h2><p>According to the Euler‘s Formula, we can convert trigonometric functions into corresponding complex forms.</p>
 <script type="math/tex; mode=display">
 e^{ix}=cos(x)+isin(x);e^{-ix}=cos(x)-isin(x)</script><p>Thus, we can transform sine function and cosine function into complex forms.</p>
 <script type="math/tex; mode=display">
 \cos(x)=\frac{e^{ix}+e^{-ix}}{2}</script><script type="math/tex; mode=display">
 sin(x)=\frac{e^{ix}-e^{-ix}}{2i}</script><p>Then, the coefficients in the Fourier Series can be written in the complex form</p>
 <script type="math/tex; mode=display">
-a_k=\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})+\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x</script><script type="math/tex; mode=display">
-b_k=\frac{1}{Ti}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x</script><script type="math/tex; mode=display">
-b_k=-\frac{i}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x</script><p>Also, the original formula can be also rewritten</p>
+a_k=\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})+\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x</script><script type="math/tex; mode=display">
+b_k=\frac{1}{Ti}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x</script><script type="math/tex; mode=display">
+b_k=-\frac{i}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x</script><p>Also, the original formula can be also rewritten</p>
 <script type="math/tex; mode=display">
-f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}(a_k\left(\exp(\frac{2\pi k\omega ix}{T})+\exp(-\frac{2\pi k\omega ix}{T})\right)+\frac{b_k}{i}\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right) )</script><p>So,</p>
+f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}(a_k\left(\exp(\frac{2\pi k ix}{T})+\exp(-\frac{2\pi k ix}{T})\right)+\frac{b_k}{i}\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right) )</script><p>So,</p>
 <script type="math/tex; mode=display">
-f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2 \pi k\omega ix}{T})\left(a_k+\frac{b_k}{i}\right)+\exp(-\frac{2\pi k\omega ix}{T})\left(a_k-\frac{b_k}{i}\right)\right)</script><script type="math/tex; mode=display">
-f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2\pi k\omega ix}{T})\left(a_k-ib_k\right)+\exp(-\frac{2\pi k\omega ix}{T})\left(a_k+ib_k\right)\right)</script><p>We can define new variable $c_k$ and $d_k$ to simplify the expression</p>
+f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2 \pi k ix}{T})\left(a_k+\frac{b_k}{i}\right)+\exp(-\frac{2\pi k ix}{T})\left(a_k-\frac{b_k}{i}\right)\right)</script><script type="math/tex; mode=display">
+f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2\pi k ix}{T})\left(a_k-ib_k\right)+\exp(-\frac{2\pi k ix}{T})\left(a_k+ib_k\right)\right)</script><p>We can define new variable $c_k$ and $d_k$ to simplify the expression</p>
 <script type="math/tex; mode=display">
 c_k=a_k-ib_k; d_k=a_k+ib_k</script><p>Then,</p>
 <script type="math/tex; mode=display">
-c_k=\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})+\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x-\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k\omega ix}{T})-\exp(-\frac{2\pi k\omega ix}{T})\right)\mathrm{d}x</script><p>After the simplification, we can get</p>
+c_k=\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})+\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x-\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x</script><p>After the simplification, we can get</p>
 <script type="math/tex; mode=display">
-c_k=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k\omega ix}{T})\mathrm{d}x</script><p>Similarly,</p>
+c_k=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k ix}{T})\mathrm{d}x</script><p>Similarly,</p>
 <script type="math/tex; mode=display">
-d_k=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(\frac{2\pi k\omega ix}{T})\mathrm{d}x</script><p>We can find the relation between $c_k$  and $d_k$</p>
+d_k=\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(\frac{2\pi k ix}{T})\mathrm{d}x</script><p>We can find the relation between $c_k$  and $d_k$</p>
 <script type="math/tex; mode=display">
 d_k=c_{-k}</script><p>So,</p>
 <script type="math/tex; mode=display">
-f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2\pi k\omega ix}{T})c_k+\exp(-\frac{2\pi k\omega ix}{T})c_{-k}\right)</script><p>After the simplification, we can finally get</p>
+f(x)=\frac{a_0}{2}+\frac{1}{2}\sum_{k=1}^{\infty}\left(\exp(\frac{2\pi k ix}{T})c_k+\exp(-\frac{2\pi k ix}{T})c_{-k}\right)</script><p>After the simplification, we can finally get</p>
 <script type="math/tex; mode=display">
-f(x)=\frac{1}{2}\sum_{k=-\infty}^{\infty}\left(\exp(\frac{2\pi k\omega ix}{T})c_k\right )</script>
+f(x)=\frac{1}{2}\sum_{k=-\infty}^{\infty}\left(\exp(\frac{2\pi k ix}{T})c_k\right )</script><p>Also, if we modify the constant factor in $c_n$</p>
+<script type="math/tex; mode=display">
+c_k=\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k ix}{T})\mathrm{d}x</script><p>The Fourier Series formula can be written in the expression below</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{k=-\infty}^{\infty}\left(\exp(\frac{2\pi k ix}{T})c_k\right )</script><h2 id="Fourier-Transform"><a href="#Fourier-Transform" class="headerlink" title="Fourier Transform"></a>Fourier Transform</h2><p>According to the Fourier Series Formula, we can get</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{k=-\infty}^{\infty}\left(\exp(\frac{2\pi k ix}{T})\left(\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k ix}{T})\mathrm{d}x\right )\right)</script><p>We can replace the period time with the frequency</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{k=-\infty}^{\infty}\left(\exp(k\omega ix)\left(\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-k\omega ix)\mathrm{d}x\right )\right)</script><p>When $T\to \infty$, then $ \omega \to 0$ . Thus When $T \to \infty$, we have</p>
+<script type="math/tex; mode=display">
+f(x)=\int_{-\infty}^{\infty}\left(\exp(\omega ix)\left(\frac{1}{2\pi}\int_{-\infty}^{\infty}f(x)\exp(-\omega ix)\mathrm{d}x\right )\right)\mathrm{d}\omega</script><p>So, the Fourier Transform can be written as</p>
+<script type="math/tex; mode=display">
+F(\omega)=\int_{-\infty}^{\infty}\exp(-\omega it)f(t)\mathrm{d}t</script><script type="math/tex; mode=display">
+f(t)=\frac{1}{2\pi}\int_{-\infty}^{\infty}\exp(\omega ix)F(\omega)\mathrm{d}\omega</script>
             </div>
             <hr>
             <div>
