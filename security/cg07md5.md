@@ -1,2 +1,2 @@
-计算机图形学第7次作业
-文件MD5:9675e31fc84a47e9e4063625dac6cb4f
+CG Homework 7
+File MD5:b67196d2208a9ec0f586e33d73bf4c3e
