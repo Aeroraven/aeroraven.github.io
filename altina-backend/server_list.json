@@ -1,4 +1,4 @@
 {
-  "availableBackends":["http://localhost:5000","http://1.116.192.77:11451"],
-  "availableSocketBackends":["http://localhost:5001","http://1.116.192.77:11452"]
+  "availableBackends":["http://localhost:5000","http://1.116.192.77:11451","http://100.73.122.187:5000/"],
+  "availableSocketBackends":["http://localhost:5001","http://1.116.192.77:11452","http://100.73.122.187:5001/"]
 }
