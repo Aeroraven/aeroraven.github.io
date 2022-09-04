@@ -21,6 +21,10 @@ uniform float uS_Roughness;
 uniform float uS_Metallic;
 uniform float uS_AO;
 
+uniform vec3 uFogColor;
+uniform float uFogNear;
+uniform float uFogFar;
+
 float geometrySchlickGGX(float cosVal,float k){
     return cosVal / (cosVal * (1.0-k)+k);
 }
@@ -132,10 +136,14 @@ void main(){
 
     //Ambient
     vec3 color = ambLight * uS_Albedo * uS_AO + Lo;
-    
+
     //Gamma
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
-     
+
+    float fogDist = length(vFragPos);
+    float fogPower = smoothstep(uFogNear,uFogFar,fogDist);
+    color = mix(color,uFogColor,fogPower);
+
     fragColor =  vec4(color,1.0);
 }

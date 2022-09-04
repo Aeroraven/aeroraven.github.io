@@ -29,6 +29,10 @@ uniform sampler2D uT_Metallic;
 uniform sampler2D uT_AO;
 uniform sampler2D uT_Roughness;
 
+uniform vec3 uFogColor;
+uniform float uFogNear;
+uniform float uFogFar;
+
 
 float geometrySchlickGGX(float cosVal,float k){
     return cosVal / (cosVal * (1.0-k)+k);
@@ -56,6 +60,11 @@ vec3 fresnelApprox(vec3 f0,float cosVal){
 
 vec3 cookTorranceCoef(float d,vec3 f,float g,float inCos,float outCos){
     return d*f*g/(4.0*inCos*outCos+0.0001);
+}
+
+float smoothstep_s(float edge0,float edge1,float x){
+    float t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
 }
 
 void main(){
@@ -119,10 +128,7 @@ void main(){
         }
         shadowW = shadowW/121.0;
         rad = (1.0-shadowW) * rad;
-        
-        
     }
-    
 
     //Fresnel approxmiation
     vec3 f0 = mix(vec3(0.04),albedo_gamma,texture(uT_Metallic,vTex).x);
@@ -149,9 +155,15 @@ void main(){
     //Ambient
     vec3 color = ambLight * albedo_gamma * texture(uT_AO,vTex).x+ Lo;
     
+
     //Gamma
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
+
+    //Fog
+    float fogDist = length(vFragPos);
+    float fogPower = smoothstep(uFogNear,uFogFar,fogDist);
+    color = mix(color,uFogColor,fogPower);
 
     fragColor =  vec4(color,1.0);
 
