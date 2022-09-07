@@ -16,8 +16,4 @@ uniform mat4 uProj;
 
 void main(){
     gl_Position = uProj * uModel * aVert;
-    vColor = aColor;
-    vTex = vec2(aTex.x,1.0-aTex.y);
-    vNorm = vec3((uModelInvTrans*vec4(aNorm,0.0)).xyz);
-    vFragPos = (uModel * aVert).xyz;
 }

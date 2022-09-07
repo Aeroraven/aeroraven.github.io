@@ -107,8 +107,6 @@ void main(){
         }
         shadowW = shadowW/121.0;
         rad = (1.0-shadowW) * rad;
-        
-        
     }
     
 
