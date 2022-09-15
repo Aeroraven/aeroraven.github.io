@@ -195,7 +195,7 @@ function Alecto(){
     };
     
     const run = async ()=>{
-        
+        this.setBannerInfo(this.lang.starts,false);
         await this.resolveDependencies();
         this.setBannerInfo(this.lang.loadComments,false);
         this.log("Loading comments");
