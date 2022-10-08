@@ -14,6 +14,10 @@ uniform mat4 uLightModel[20];
 
 out vec4 fragmentColor;
 
+vec4 lerp (vec4 a, vec4 b, float x){
+    return a + x * (b - a);
+}
+
 void main(){
     vec4 vPosC = uShadowOrtho * uLightModel[0] * vFragPos;
     vPosC.x*=0.15;
@@ -38,11 +42,22 @@ void main(){
     shadowW = shadowW/121.0;
 
     vec3 texColor = pow(texture(uDiffuse, vTex).rgb, vec3(2.2));
-    vec3 light = (uModel * vec4(-1.0,1.0,0.0,0.0)).xyz;
-    float ambient = 0.25;
+    vec3 light = (uModel * normalize(vec4(-4.0,-2.0,2.0,0.0))).xyz;
+    float ambient = 0.15;
+    float diffusePart = 0.85;
     float diffuse = max(dot(vNorm,light),0.0);
     diffuse = (1.0-shadowW)*diffuse;
-    vec3 mixedColor = texColor * (ambient+diffuse);
+
+    //Diffuse Ramp
+    vec4 highlightColor = vec4(vec3(0.8),1.0);
+    vec4 shadowColor = vec4(vec3(0.2),1.0);
+    float rampThresh = 0.25;
+    float rampSmooth = 0.1;
+    float ramp = smoothstep(rampThresh-rampSmooth*0.5,rampThresh+rampSmooth*0.5,diffuse);
+    vec4 rampColor = lerp(shadowColor,highlightColor,ramp);
+    diffuse = ramp;
+
+    vec3 mixedColor = texColor * ambient + texColor * rampColor.xyz * diffusePart;
     fragmentColor =  vec4(pow(mixedColor,vec3(1.0/2.2)),1.0); 
     //fragmentColor =  vec4(vec3(gl_FragDepth),1.0); 
 }

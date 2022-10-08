@@ -16,8 +16,8 @@ void main(){
     vec4 vert = aVert;
     vec4 outputV = uShadowOrtho * uModel * vert;
     outputV = outputV / outputV.w;
-    outputV.x*=0.25;
-    outputV.y*=0.25;
+    outputV.x*=0.15;
+    outputV.y*=0.15;
     gl_Position = outputV;
     vPos = vert;
     vTex = aTex;

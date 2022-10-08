@@ -7,6 +7,7 @@ in mediump vec4 vFragPos;
 
 uniform sampler2D uDiffuse;
 uniform sampler2D uSpecular;
+uniform sampler2D uNormal;
 uniform vec3 uCamPos;
 uniform mat4 uModel;
 uniform mat4 uShadowOrtho;
@@ -39,10 +40,9 @@ void main(){
 
     vec3 texColor = pow(texture(uDiffuse, vTex).rgb, vec3(2.2));
     vec3 light = (uModel * vec4(-1.0,1.0,0.0,0.0)).xyz;
-    float ambient = 0.25;
+    float ambient = pow(0.3,2.2);
     float diffuse = max(dot(vNorm,light),0.0);
     diffuse = (1.0-shadowW)*diffuse;
-    vec3 mixedColor = texColor * (ambient+diffuse);
-    fragmentColor =  vec4(pow(mixedColor,vec3(1.0/2.2)),1.0); 
-    //fragmentColor =  vec4(vec3(gl_FragDepth),1.0); 
+    vec3 mixedColor = texColor;
+    fragmentColor =  vec4(pow(mixedColor,vec3(1.0/2.2)),diffuse); 
 }
