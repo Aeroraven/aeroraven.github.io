@@ -1,0 +1,778 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Aeroraven">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Algorithm to generate acoustic features like Mel Frequency Cepstral Coefficient (MFCC) for a segment of speech.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(ML&#x2F;ASR) Speech Signal Analysis">
+<meta property="og:url" content="https://aeroraven.github.io/2020/10/10/speech-signal-analysis/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Algorithm to generate acoustic features like Mel Frequency Cepstral Coefficient (MFCC) for a segment of speech.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-10-10T02:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-15T14:01:53.610Z">
+<meta property="article:author" content="Aeroraven">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>(ML/ASR) Speech Signal Analysis - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"aeroraven.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Aeroraven</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="(ML/ASR) Speech Signal Analysis"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-10-10 10:00" pubdate>
+          October 10, 2020 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          30k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          247 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">(ML/ASR) Speech Signal Analysis</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p>The goal of this assignement is to generate acoustic features like Mel Frequency Cepstral Coefficient (MFCC) for a segment of speech. The process of speech signal analysis covers steps including pre-emphasis, windowing, Short Time Fourier transform (STFT) and so on.</p>
+<h3 id="2-Pre-emphasis"><a href="#2-Pre-emphasis" class="headerlink" title="2. Pre-emphasis"></a>2. Pre-emphasis</h3><p>Pre-emphasis is the first step of the speech signal analysis. The goal of this process is to increase the magnitude of higher frequencies in the speech signal compared with those with lower frequencies. According to the analysis of glottal source and several physical laws like the Acoustic attenuation law, signals with higher frequencies tend to attenuate and have less signal.  </p>
+<p>Pre-emphasis use the following formula to transform the speech signal. Where $\alpha$​​​ is the pre-emphasis factor, ususally ranged from 0.95 to 0.99. In this assignment, the factor defaults to 0.97.<br>$$<br>x_t^{‘}&#x3D;x_t-\alpha x_{t-1}<br>$$</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_preemphasis</span>(<span class="hljs-params">audio_signal, preemphasis_factor=PREEMPHASIS_FACTOR</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Apply the pre-emphasis transform on an audio sequence</span><br><span class="hljs-string">    :param audio_signal: (ndarray) input audio sequence</span><br><span class="hljs-string">    :param preemphasis_factor: (float) factor of pre-emphasis</span><br><span class="hljs-string">    :return: (ndarray) pre-emphasized audio sequence</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    audio_shift = np.concatenate((audio_signal[<span class="hljs-number">1</span>:<span class="hljs-built_in">len</span>(audio_signal)], [<span class="hljs-number">0</span>]), <span class="hljs-number">0</span>)<br>    audio_preemphasized = audio_shift - audio_signal * preemphasis_factor<br>    <span class="hljs-keyword">return</span> audio_preemphasized, audio_signal<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-Windowing"><a href="#3-Windowing" class="headerlink" title="3. Windowing"></a>3. Windowing</h3><p>Actually, our speech signal is non-stationary. This contradicts with the settings of the signal processing algorithms, which perceive signals as stationary sequences. To solve this problem, windowing is introduced.</p>
+<p>In windowing processing, we divided the audio signal into several frames. The division operation contains two vital parameters.</p>
+<ul>
+<li>Frame Width. Frame width defines the window size of each frames, for acoustic signal recognition, the value defaults to 25 milliseconds.</li>
+<li>Frame Shift. In acoustic signal recognition, the semantic information is continuous. To preserve the continuity, we allow a following frame overlap with its predecessor frame. For example, now we select a frame with starting timestamp $a$, and we define the frame shift $b$, then the start timestamp of the following frame should be $a+b$</li>
+</ul>
+<p>When windowing comes to practice, we need padding zeros to ensure that the last frame can be successfully made. This ensures the signal length satisfies the formula below.<br>$$<br>Padded_audio_length &#x3D; Frame_width+Frame_shift\times k,k\in\mathbb{Z}<br>$$<br>where $k+1$ equals number of frames</p>
+<p>Also, in windowing step, Hamming and Hanning windows are commonly used.</p>
+<p>The code is shown below</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_windowing</span>(<span class="hljs-params">audio_signal, sampling_rate, windowing_factor=WINDOWING_FACTOR, frame_shift_ms=FRAME_SHIFT_MS,</span><br><span class="hljs-params">                    frame_size_ms=FRAME_SIZE_MS</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Divide the audio sequence into tiny windows.</span><br><span class="hljs-string">    :param audio_signal: (ndarray,1d) input audio sequence</span><br><span class="hljs-string">    :param sampling_rate: (int/float) the sample frequence of the input audio sequence</span><br><span class="hljs-string">    :param windowing_factor: (float) the weight factor used in Hanning or Hamming window</span><br><span class="hljs-string">    :param frame_shift_ms: (int) the increment of the start point between two adjacent window</span><br><span class="hljs-string">    :param frame_size_ms: (int) the length of each window</span><br><span class="hljs-string">    :return: (ndarray,2d) windowed audio sequence</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    audio_len = <span class="hljs-built_in">len</span>(audio_signal)<br>    frame_size = <span class="hljs-built_in">int</span>(frame_size_ms* sampling_rate / <span class="hljs-number">1000</span> )<br>    frame_shift = <span class="hljs-built_in">int</span>(frame_shift_ms * sampling_rate / <span class="hljs-number">1000</span>)<br>    audio_paddings = (frame_size - audio_len) % frame_shift<br>    audio_signal_padded = np.pad(audio_signal, (<span class="hljs-number">0</span>, audio_paddings), mode=<span class="hljs-string">&quot;constant&quot;</span>, constant_values=(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>))<br>    frame_count = (<span class="hljs-built_in">len</span>(audio_signal_padded) - frame_size) // frame_shift + <span class="hljs-number">1</span><br>    frame_window = np.zeros((frame_count, frame_size))<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;AUDIO LEN&quot;</span>)<br>    <span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(audio_signal_padded))<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(frame_count):<br>        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(frame_shift * i, frame_shift * i + frame_size):<br>            t = j - frame_shift * i<br>            frame_window[i, t] = audio_signal_padded[j] * (<br>                    (<span class="hljs-number">1</span> - windowing_factor) - windowing_factor * np.cos(<span class="hljs-number">2</span> * np.pi * t / (frame_size - <span class="hljs-number">1</span>)))<br>    frame_window_transformed = frame_window.copy()<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Windowing: done&quot;</span>)<br>    <span class="hljs-keyword">return</span> frame_window_transformed, frame_count, frame_size<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-Short-time-Fourier-Transform-STFT"><a href="#4-Short-time-Fourier-Transform-STFT" class="headerlink" title="4. Short-time Fourier Transform (STFT)"></a>4. Short-time Fourier Transform (STFT)</h3><p>For every frame we get from the windowing step, we perform discrete Fourier Transform on it. This operation converts signals from time domain to frequency domain. To perform discrete Fourier Transform, Fast Fourier Transform algorithm is used.</p>
+<h4 id="4-1-Fourier-Series"><a href="#4-1-Fourier-Series" class="headerlink" title="4.1 Fourier Series"></a>4.1 Fourier Series</h4><p>Before the explanation of Fourier Transformation, Fourier Series should be explained first.</p>
+<p>We all know that, any periodic function can be rewritten in the Fourier-series form:<br>$$<br>f(x)&#x3D;A_0+\sum_{k&#x3D;1}^{\infty}(a_k\cos(k x)+b_k\sin(k x))<br>$$<br>First, we need calculate the coefficient $A_0$<br>$$<br>\int_{-\pi}^{\pi}f(x)\mathrm{d}x&#x3D;2\pi A_0+\sum_{k&#x3D;1}^{\infty}(\int_{-\pi}^{\pi}a_k\cos(k x)\mathrm{d}x+\int_{-\pi}^{\pi}b_k\sin(k x)\mathrm{d}x)&#x3D;2\pi A_0<br>$$<br>Thus,<br>$$<br>A_0&#x3D;\frac{1}{2\pi}\int_{-\pi}^{\pi}f(x)\mathrm{d}x<br>$$<br>Next, calculate the coefficients $a_k$<br>$$<br>\int_{-\pi}^{\pi}f(x)\cos(n x)\mathrm{d}x&#x3D;\int_{-\pi}^{\pi}A_0\cos(n x)\mathrm{d}x+\sum_{k&#x3D;1}^{\infty}(\int_{-\pi}^{\pi}a_k\cos(k x)\cos(n x)\mathrm{d}x+\int_{-\pi}^{\pi}b_k\sin(k x)\cos(n x)\mathrm{d}x)&#x3D;2\pi A_0<br>$$</p>
+<p>Simplify the equation above.<br>$$<br>\int_{-\pi}^{\pi}f(x)\cos(n x)\mathrm{d}x&#x3D;\int_{-\pi}^{\pi}a_n\cos^2(n x)\mathrm{d}x&#x3D;\int_{-\pi}^{\pi}a_n(\frac{1+cos(2n x)}{2})\mathrm{d}x&#x3D;a_n\pi<br>$$<br>Thus,<br>$$<br>a_k&#x3D;\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\cos(k x)\mathrm{d}x<br>$$<br>Similarly, we can get<br>$$<br>b_k&#x3D;\frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\sin(k x)\mathrm{d}x<br>$$<br>Assuming the period of the function is $T$​, we can convert it into a new function with period of $2\pi$<br>$$<br>t&#x3D;\frac{2\pi x}{T}; f(x)&#x3D;f(\frac{2\pi x}{T})&#x3D;g(t)<br>$$<br>Then,<br>$$<br>f(x)&#x3D;g(t)&#x3D;\frac{a_0}{2}+\sum_{k&#x3D;1}^{\infty}(a_k\cos(\frac{2\pi k x}{T} )+b_k\sin(\frac{2\pi k x}{T} ))<br>$$<br>Where,<br>$$<br>a_0&#x3D;\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\mathrm{d}t&#x3D;\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\mathrm{d}x<br>$$</p>
+<p>$$<br>a_k&#x3D;\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\cos(k x)\mathrm{d}t&#x3D;\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\cos(\frac{2\pi k x}{T})\mathrm{d}x<br>$$</p>
+<p>$$<br>b_k&#x3D;\frac{1}{\pi}\int_{-\pi}^{\pi}g(t)\sin(k x)\mathrm{d}t&#x3D;\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\sin(\frac{2\pi k x}{T})\mathrm{d}x<br>$$</p>
+<h4 id="4-2-Fourier-Series-in-the-Complex-Form"><a href="#4-2-Fourier-Series-in-the-Complex-Form" class="headerlink" title="4.2 Fourier Series in the Complex Form"></a>4.2 Fourier Series in the Complex Form</h4><p>According to the Euler‘s Formula, we can convert trigonometric functions into corresponding complex forms.<br>$$<br>e^{ix}&#x3D;cos(x)+isin(x);e^{-ix}&#x3D;cos(x)-isin(x)<br>$$<br>Thus, we can transform sine function and cosine function into complex forms.<br>$$<br>\cos(x)&#x3D;\frac{e^{ix}+e^{-ix}}{2}<br>$$</p>
+<p>$$<br>sin(x)&#x3D;\frac{e^{ix}-e^{-ix}}{2i}<br>$$</p>
+<p>Then, the coefficients in the Fourier Series can be written in the complex form<br>$$<br>a_k&#x3D;\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})+\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x<br>$$</p>
+<p>$$<br>b_k&#x3D;\frac{1}{Ti}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x<br>$$</p>
+<p>$$<br>b_k&#x3D;-\frac{i}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x<br>$$</p>
+<p>Also, the original formula can be also rewritten<br>$$<br>f(x)&#x3D;\frac{a_0}{2}+\frac{1}{2}\sum_{k&#x3D;1}^{\infty}(a_k\left(\exp(\frac{2\pi k ix}{T})+\exp(-\frac{2\pi k ix}{T})\right)+\frac{b_k}{i}\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right) )<br>$$<br>So,<br>$$<br>f(x)&#x3D;\frac{a_0}{2}+\frac{1}{2}\sum_{k&#x3D;1}^{\infty}\left(\exp(\frac{2 \pi k ix}{T})\left(a_k+\frac{b_k}{i}\right)+\exp(-\frac{2\pi k ix}{T})\left(a_k-\frac{b_k}{i}\right)\right)<br>$$</p>
+<p>$$<br>f(x)&#x3D;\frac{a_0}{2}+\frac{1}{2}\sum_{k&#x3D;1}^{\infty}\left(\exp(\frac{2\pi k ix}{T})\left(a_k-ib_k\right)+\exp(-\frac{2\pi k ix}{T})\left(a_k+ib_k\right)\right)<br>$$</p>
+<p>We can define new variable $c_k$ and $d_k$ to simplify the expression<br>$$<br>c_k&#x3D;a_k-ib_k; d_k&#x3D;a_k+ib_k<br>$$<br>Then,<br>$$<br>c_k&#x3D;\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})+\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x-\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\left(\exp(\frac{2\pi k ix}{T})-\exp(-\frac{2\pi k ix}{T})\right)\mathrm{d}x<br>$$<br>After the simplification, we can get<br>$$<br>c_k&#x3D;\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k ix}{T})\mathrm{d}x<br>$$<br>Similarly,<br>$$<br>d_k&#x3D;\frac{2}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(\frac{2\pi k ix}{T})\mathrm{d}x<br>$$<br>We can find the relation between $c_k$  and $d_k$<br>$$<br>d_k&#x3D;c_{-k}<br>$$<br>So,<br>$$<br>f(x)&#x3D;\frac{a_0}{2}+\frac{1}{2}\sum_{k&#x3D;1}^{\infty}\left(\exp(\frac{2\pi k ix}{T})c_k+\exp(-\frac{2\pi k ix}{T})c_{-k}\right)<br>$$<br>After the simplification, we can finally get<br>$$<br>f(x)&#x3D;\frac{1}{2}\sum_{k&#x3D;-\infty}^{\infty}\left(\exp(\frac{2\pi k ix}{T})c_k\right )<br>$$</p>
+<p>Also, if we modify the constant factor in $c_n$<br>$$<br>c_k&#x3D;\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k ix}{T})\mathrm{d}x<br>$$<br>The Fourier Series formula can be written in the expression below<br>$$<br>f(x)&#x3D;\sum_{k&#x3D;-\infty}^{\infty}\left(\exp(\frac{2\pi k ix}{T})c_k\right )<br>$$</p>
+<h4 id="4-3-Fourier-Transform"><a href="#4-3-Fourier-Transform" class="headerlink" title="4.3 Fourier Transform"></a>4.3 Fourier Transform</h4><p>According to the Fourier Series Formula, we can get<br>$$<br>f(x)&#x3D;\sum_{k&#x3D;-\infty}^{\infty}\left(\exp(\frac{2\pi k ix}{T})\left(\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-\frac{2\pi k ix}{T})\mathrm{d}x\right )\right)<br>$$<br>We can replace the period time with the frequency<br>$$<br>f(x)&#x3D;\sum_{k&#x3D;-\infty}^{\infty}\left(\exp(k\omega ix)\left(\frac{1}{T}\int_{-\frac{T}{2}}^{\frac{T}{2}}f(x)\exp(-k\omega ix)\mathrm{d}x\right )\right)<br>$$<br>When $T\to \infty$, then $ \omega \to 0$ . Thus When $T \to \infty$, we have<br>$$<br>f(x)&#x3D;\int_{-\infty}^{\infty}\left(\exp(\omega ix)\left(\frac{1}{2\pi}\int_{-\infty}^{\infty}f(x)\exp(-\omega ix)\mathrm{d}x\right )\right)\mathrm{d}\omega<br>$$<br>So, the Fourier Transform can be written as<br>$$<br>F(\omega)&#x3D;\int_{-\infty}^{\infty}\exp(-\omega it)f(t)\mathrm{d}t<br>$$</p>
+<p>$$<br>f(t)&#x3D;\frac{1}{2\pi}\int_{-\infty}^{\infty}\exp(\omega it)F(\omega)\mathrm{d}\omega<br>$$</p>
+<h4 id="4-4-Discrete-Fourier-Transform-DFT"><a href="#4-4-Discrete-Fourier-Transform-DFT" class="headerlink" title="4.4 Discrete Fourier Transform (DFT)"></a>4.4 Discrete Fourier Transform (DFT)</h4><p>For computers, discrete data might be an optimal choice compared to continuous data. The Fourier Transform formula given above is perfect, but it is hard to implement the algorithm on computers. Thus, we need a discrete algorithm for the Fourier Transform. Therefore, Discrete Fourier Transform algorithm is introduced. The principles of DFT are as follow.</p>
+<p>Let $x_n$​ be sampling points. Then we sample following angular frequencies.<br>$$<br>\omega_n &#x3D; \frac{2\pi n}{N}<br>$$<br>The transform from time domain to frequency domain can be described as the equation below.<br>$$<br>F(n)&#x3D;\sum_{t&#x3D;0}^{N-1}\exp(-\frac{2\pi n}{N}it)x_t<br>$$<br>And its corresponding inverse transform (IDFT) can be described as the equation below.<br>$$<br>f(t)&#x3D;\frac{1}{N}\sum_{n&#x3D;0}^{N-1}\exp(\frac{2\pi n}{N}it)F(n)<br>$$<br>We can define the matrix of time domain as<br>$$<br>X&#x3D;(x_0,x_1,…,x_n)^T<br>$$<br> and the matrix of frequency domain as<br>$$<br>Y&#x3D;(X_1,…,X_n)^T<br>$$</p>
+<p>DFT can be written in a matrix<br>$$<br>W&#x3D;{a_{nt}}<br>$$</p>
+<p>$$<br>a_{nt}&#x3D;\exp(-\frac{2\pi n}{N}it)<br>$$</p>
+<p>Then, $Y$ can be calculated by<br>$$<br>Y&#x3D;WX<br>$$<br>IDFT can also be written in a matrix form. $I&#x3D;b_{tn}$<br>$$<br>b_{tn}&#x3D;\exp(\frac{2\pi n}{N}it)&#x3D;\frac{1}{a_{nt}}<br>$$<br>Then, $X$​ can be calculated by<br>$$<br>X&#x3D;IY<br>$$</p>
+<h4 id="4-5-Fast-Fourier-Transform-FFT"><a href="#4-5-Fast-Fourier-Transform-FFT" class="headerlink" title="4.5 Fast Fourier Transform (FFT)"></a>4.5 Fast Fourier Transform (FFT)</h4><p>Fast Fourier Transform algorithm is an optimal implementation of discrete Fourier transform, which reduces time complexity from $O(n^2)$ to $O(\log_2(n))$</p>
+<p>Before diving into the details of Fast Fourier Transform, we need to define unit roots $\omega_n^{k}$​<br>$$<br>\omega_n^k&#x3D;\cos(\frac{2\pi k}{n})+i\sin(\frac{2\pi k}{n})<br>$$<br>Then, we can discover following rules:</p>
+<p>Rule #1<br>$$<br>\omega_{2n}^{2k}&#x3D;\omega_{n}^{k}<br>$$<br>Rule #2<br>$$<br>\omega_{n}^{k+\frac{n}{2}}&#x3D;-\cos(\frac{2\pi k}{n})-i\sin(\frac{2\pi k}{n})&#x3D;-\omega_{n}^{k}<br>$$<br>The unit root can also be written in the complex form.<br>$$<br>\omega_n^k&#x3D;\exp(\frac{2\pi k i}{n})<br>$$<br>Thus, DFT transform can be written in the expression below:<br>$$<br>F(n)&#x3D;\sum_{t&#x3D;0}^{N-1}\omega_N^{-nt}x_t<br>$$<br>And, IDFT transform can be written as<br>$$<br>f(t)&#x3D;\sum_{n&#x3D;0}^{N-1}\omega_N^{nt}F(n)<br>$$<br>Consider the written form of DFT transform, we can divide it into two parts. (Assuming $N&#x3D;2^p$)<br>$$<br>F(n)&#x3D;\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt}x_{2t}+\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt-n}x_{2t+1}<br>$$</p>
+<p>$$<br>F(n)&#x3D;\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt}x_{2t}+\omega_{N}^{-n}\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt}x_{2t+1}<br>$$</p>
+<p>Then, we can find that we can recursively calculate the expression<br>$$<br>F(n)&#x3D;F_1(n)+\omega_{N}^{-n}F_2(n)<br>$$<br>Consider the calculation of $F_1$​<br>$$<br>F_1(n)&#x3D;\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt}x_{2t}&#x3D;\sum_{t&#x3D;0}^{\frac{N}{4}-1}\omega_N^{-4nt}x_{4t}+\omega_{N}^{-2n}\sum_{t&#x3D;0}^{\frac{N}{4}-1}\omega_N^{-4nt}x_{4t+2}<br>$$<br>We can similarly calculate $F_2$</p>
+<p>Consider the expression $F(n)$<br>$$<br>F(n+\frac{N}{2})&#x3D;\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt}\omega_N^{-Nt} x_{2t}+\sum_{t&#x3D;0}^{\frac{N}{2}-1}\omega_N^{-2nt-n}\omega_N^{-Nt}\omega_N^{-\frac{N}{2}}x_{2t+1}&#x3D;F_1(n)-\omega_N^{-n}F_2(n)<br>$$<br>Thus, we only need to calculate $F(n),n\leq \frac{N}{2}$​​ recursively </p>
+<h4 id="4-6-Perform-Fast-Fourier-Transform-on-Frames"><a href="#4-6-Perform-Fast-Fourier-Transform-on-Frames" class="headerlink" title="4.6 Perform Fast Fourier Transform on Frames"></a>4.6 Perform Fast Fourier Transform on Frames</h4><p>In this assignment, I use <code>Numpy</code> package to calculate the transformed results. In <code>Numpy</code>, number of FFT bins does not need to be the power of 2. However, I make the number of bins the power of 2 to follow the convention. After the transform, complex numbers are all turned to real numbers by calculating their squared complex distances (the squared absolute value of complexes)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_fft</span>(<span class="hljs-params">frame_window, frame_count</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Apply the STFT on the audio sequence</span><br><span class="hljs-string">    :param frame_window: (ndarray,2d) input windowed audio sequence</span><br><span class="hljs-string">    :param frame_count: (int) count of windowed frames</span><br><span class="hljs-string">    :return: (ndarray,2d ; int) spectrogram of the audio sequence and fft bins</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    frame_window_transformed = []<br>    fft_bins = <span class="hljs-number">1</span><br>    <span class="hljs-comment"># Make the bin of FFT be the power of 2</span><br>    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:<br>        <span class="hljs-keyword">if</span> fft_bins &lt; frame_window.shape[<span class="hljs-number">1</span>]:<br>            fft_bins = fft_bins * <span class="hljs-number">2</span><br>        <span class="hljs-keyword">else</span>:<br>            <span class="hljs-keyword">break</span><br>    <span class="hljs-comment"># Perform FFT</span><br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(frame_count):<br>        freq_amp = np.fft.rfft(frame_window[i], fft_bins)<br>        freq_amp_real = np.real(freq_amp)<br>        freq_amp_imag = np.imag(freq_amp)<br>        freq_amp_dist = (freq_amp_imag * freq_amp_imag + freq_amp_real * freq_amp_real)<br>        frame_window_transformed.append(freq_amp_dist)<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;DFT: done&quot;</span>)<br>    <span class="hljs-keyword">return</span> np.array(frame_window_transformed), fft_bins<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-Mel-Filter-Bank-amp-Log-Feature"><a href="#5-Mel-Filter-Bank-amp-Log-Feature" class="headerlink" title="5. Mel Filter Bank &amp; Log Feature"></a>5. Mel Filter Bank &amp; Log Feature</h3><p>For human, hearing is less sensitive to signals with higher frequencies. In other word, our perception of frequencies can be represented by a non-linear function. In 1937, Stevens, Volkmann and Newman proposed a new perceptual scale of pitches judged by listeners. The name of the proposed scale is Mel scale. The relation of Mel frequency and normal frequency can be illustrated by the formula below.<br>$$<br>f_{mel}(f)&#x3D;1127\ln(1+\frac{f}{700})<br>$$<br>With the help of Mel frequency, we can readjust feature extracted by STFT to make it meets our perceptual characteristics. Such processing is called Mel Filter Bank.</p>
+<p>The processing procedure contains following steps.</p>
+<ol>
+<li><p>Define basic parameters of the filters. Including the lower bound of frequencies $f_L$​, higher bound of frequencies $f_H$​, number of filters to be used $N$​, number of FFT bins used $N_{fft}$​ , sampling rate $f_s$. In most cases, $f_L$ defaults to 300 Hz and $f_H$ defaults to 8000 Hz (or the half of the sampling rate). $N$ always defaults to 26</p>
+</li>
+<li><p>Convert the upper and lower frequencies to their corresponding Mel frequency.<br>   $$<br>   f_{mel}(f_L)&#x3D;1127\ln(1+\frac{f_L}{700})<br>   $$</p>
+</li>
+</ol>
+<p>   $$<br>   f_{mel}(f_H)&#x3D;1127\ln(1+\frac{f_H}{700})<br>   $$</p>
+<ol start="3">
+<li><p>Select $N+2$ points from $\left[f_{mel}(f_L),f_{mel}(f_H)\right]$ uniformly. For the i-th point, its Mel frequency is<br>$$<br>f_{mel}(f_i)&#x3D;(f_{mel}(f_H)-f_{mel}(f_L))\times i+f_{mel}(f_L)<br>$$</p>
+</li>
+<li><p>Convert the Mel frequencies back to Hertz (normal frequencies). This uses the inverse function of Mel scale<br>$$<br>f_{mel}^{-1}(f)&#x3D;700(\exp(\frac{m}{1127})-1)<br>$$</p>
+<p>$$<br>f_i&#x3D;f_{mel}^{-1}((f_{mel}(f_H)-f_{mel}(f_L))\times i+f_{mel}(f_L))<br>$$</p>
+</li>
+<li><p>Round frequencies to the nearest fft bin<br>$$<br>h(i)&#x3D;\lfloor(N_{fft}+1)\times \frac{f_i}{f_s}\rfloor<br>$$</p>
+</li>
+<li><p>Create filter bank matrix $M$ with $N$ rows and $\frac{N_{fft}}{2}+1$ columns. For i-th filter and j-th FFT bin, the element in the matrix can be calculated by the following formula.<br>$$<br>M(i,j)&#x3D;0,\quad j&lt;f(i-1),or\quad j&gt;f(i+1)\<br>M(i,j)&#x3D;\frac{k-f(i-1)}{f(i)-f(i-1)},\quad f(i-1)\leq j&lt; f(i)\<br>M(i,j)&#x3D;\frac{f(i-1)-k}{f(i+1)-f(i)},\quad f(i)&lt; j\leq f(i+1)<br>$$</p>
+</li>
+</ol>
+<p>Now, filter bank can be created via codes</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_mel_filter_banks</span>(<span class="hljs-params">sampling_freq, fft_size, filters=MEL_FILTERS, low_freq=MEL_FILTER_LOW_FREQ,</span><br><span class="hljs-params">                         high_freq=MEL_FILTER_HIGH_FREQ</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Get the matrix for FFT-bins-aligned Mel filter bank matrix</span><br><span class="hljs-string">    :param sampling_freq: (int) Sampling frequency</span><br><span class="hljs-string">    :param fft_size: (int) Size of FFT bins</span><br><span class="hljs-string">    :param filters:  (int) Size of output numbers of Mel filters</span><br><span class="hljs-string">    :param low_freq: (int) the lower bound frequency of Mel filters</span><br><span class="hljs-string">    :param high_freq:  (int) the higher bound frequency of Mel filters</span><br><span class="hljs-string">    :return: (ndarray,2d) Filter matrix, each row corresponds to a Mel filter, each column corresponds to a FFT bin</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    m_freqs = np.array([mel_freq(low_freq) + i * (mel_freq(high_freq) - mel_freq(low_freq)) / (filters + <span class="hljs-number">1</span>) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span><br>                        <span class="hljs-built_in">range</span>(filters + <span class="hljs-number">2</span>)])<br>    norm_freqs = mel_freq_inverse(m_freqs)<br>    fft_aligned_freq = np.floor((fft_size / sampling_freq) * norm_freqs)<br>    mel_filters = np.zeros((filters, fft_size // <span class="hljs-number">2</span> + <span class="hljs-number">1</span>))<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(filters):<br>        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(fft_size):<br>            <span class="hljs-keyword">if</span> fft_aligned_freq[i + <span class="hljs-number">1</span>] &gt;= j &gt; fft_aligned_freq[i]:<br>                mel_filters[i, j] = (j - fft_aligned_freq[i]) / (fft_aligned_freq[i + <span class="hljs-number">1</span>] - fft_aligned_freq[i])<br>            <span class="hljs-keyword">elif</span> fft_aligned_freq[i + <span class="hljs-number">1</span>] &lt; j &lt; fft_aligned_freq[i + <span class="hljs-number">2</span>]:<br>                mel_filters[i, j] = (fft_aligned_freq[i + <span class="hljs-number">2</span>] - j) / (fft_aligned_freq[i + <span class="hljs-number">2</span>] - fft_aligned_freq[i + <span class="hljs-number">1</span>])<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Get Mel-filter Bank: done&quot;</span>)<br>    <span class="hljs-keyword">return</span> mel_filters<br></code></pre></td></tr></table></figure>
+
+
+
+<ol start="7">
+<li><p>Calculate the matrix filtered by Mel Filter Bank. If the output of STFT is matrix $A_{T\times N_{fft}}$, and Mel filter bank is matrix $B_{N_{fft}\times N}$. Then the output feature $Feat$ can be defined as:<br>$$<br>Feat &#x3D; A\times B^T<br>$$</p>
+</li>
+<li><p>Normally, we prefer the logarithmic feature. Thus, we perform the following transform<br>$$<br>Feat\gets \log(Feat)<br>$$</p>
+</li>
+<li><p>Calculate log energy.  If the output of STFT is matrix $A_{T\times N_{fft}}$​, the $Energy$​ is a T-dimension vector. The i-th element in the vector can be defined as<br>$$<br>Energy(i)&#x3D;\log(\sum_{k&#x3D;1}^{N_{fft}} A_{i,k})<br>$$</p>
+</li>
+</ol>
+<p>Step 7 and step 8 can be done by following codes</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_feat_and_energy</span>(<span class="hljs-params">stft_matrix, mel_filter_banks, log_energy=<span class="hljs-literal">True</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Get feature and energy from the acoustic signal processed by STFT</span><br><span class="hljs-string">    :param log_energy: (boolean, optional) If the value is True, logarithmic energy will be used</span><br><span class="hljs-string">    :param stft_matrix: (ndarray,2d) acoustic signal processed by STFT</span><br><span class="hljs-string">    :param mel_filter_banks: (ndarray,2d) Mel filter bank matrix</span><br><span class="hljs-string">    :return: (tuple) the first element is feature, the second one is energy</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    feat = np.dot(stft_matrix, mel_filter_banks.T)<br>    energy = np.<span class="hljs-built_in">sum</span>(stft_matrix, <span class="hljs-number">1</span>)<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(energy)):<br>        <span class="hljs-keyword">if</span> energy[i] == <span class="hljs-number">0</span>:<br>            energy[i] = np.finfo(<span class="hljs-built_in">float</span>).eps<br>    <span class="hljs-keyword">if</span> log_energy:<br>        energy = np.log(energy)<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Calculate Feat (Apply Mel-filter Bank): done&quot;</span>)<br>    <span class="hljs-keyword">return</span> feat, energy<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="6-Discrete-Cosine-Transform-DCT-amp-Log-Energy"><a href="#6-Discrete-Cosine-Transform-DCT-amp-Log-Energy" class="headerlink" title="6. Discrete Cosine Transform (DCT) &amp; Log Energy"></a>6. Discrete Cosine Transform (DCT) &amp; Log Energy</h3><p>The estimated power spectrum contains harmonics of the primary frequency. This makes it harder to estimate the envelop of the spectrum. Besides, bins of STFT are correlated with each other. All of these problems make further analysis hard to be done.</p>
+<p>Cepstral analysis solves the problem above. In source-filter model of speech production, two vital components are investigated. The first component is source characteristics and the second one is the filter characteristics. Source characteristics do not contribute to phone discriminations, while filter characteristics help us to figure out the position of the articulators. And cepstral analysis help us to separate the filter characteristics and source characteristics.</p>
+<p>Cepstrum can be got via applying IDFT to log spectrum. And since log spectrum is real and symmetric. The IDFT can be replaced by DCT, with following formula:<br>$$<br>C_t(j)&#x3D;\sum_{m&#x3D;0}^{M-1}Feat(t,m)\cos\left((m+0.5)\frac{j\pi}{M}\right), j&#x3D;0,1,…,C-1<br>$$<br>where $C$​​ is number of coefficients we want to extract. Normally, $C&#x3D;13$</p>
+<p>After the transform, we can get 13 MFCC features. However, we can find the value of $C_t(0)$ is significantly larger than other 12 MFCC features. This indirectly causes the decrease of recognition rate after we feed these features into our ASR model. To solve this problem, $C_t(0)$ is replaced by the logarithmic energy ($Energy$​)。</p>
+<p>The code shows how to implement DCT</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_dct</span>(<span class="hljs-params">feat, mfcc_nums=MFCC_NUMBERS</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Perform the discrete cosine transformation(DCT) on a feature matrix</span><br><span class="hljs-string">    :param feat: (ndarray,2d) feature matrix</span><br><span class="hljs-string">    :param mfcc_nums: (int) output MFCC numbers</span><br><span class="hljs-string">    :return: (ndarray,2d) DCT-processed feature matrix</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    dct_matrix = np.zeros((feat.shape[<span class="hljs-number">0</span>], mfcc_nums))<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(feat.shape[<span class="hljs-number">0</span>]):<br>        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(mfcc_nums):<br>            <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(feat.shape[<span class="hljs-number">1</span>]):<br>                dct_matrix[i, j] += feat[i, k] * np.cos((k + <span class="hljs-number">0.5</span>) * j * np.pi / feat.shape[<span class="hljs-number">1</span>])<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;DCT: done&quot;</span>)<br>    <span class="hljs-built_in">print</span>(dct_matrix.shape)<br>    <span class="hljs-keyword">return</span> dct_matrix<br></code></pre></td></tr></table></figure>
+
+<p>And the code below shows how to replace $C_t(0)$ with $Energy$</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">dct_result = audio_dct(log_feat)<br>dct_result[:,<span class="hljs-number">0</span>] = energy<br></code></pre></td></tr></table></figure>
+
+<p>Finally, the first 13 MFCC features are obtained</p>
+<h3 id="7-Dynamic-Features-Delta-amp-Delta-delta"><a href="#7-Dynamic-Features-Delta-amp-Delta-delta" class="headerlink" title="7. Dynamic Features (Delta &amp; Delta-delta)"></a>7. Dynamic Features (Delta &amp; Delta-delta)</h3><p>In most cases, speech is not constant between frames. Thus, performing transform on cepstral coefficients to enable the coefficients show the changes over time is an excellent idea. To achieve this goal, delta features are appended.</p>
+<p>For coefficient $c_{t,i}$ (frame $t$, feature $i$), we can perform the following transform<br>$$<br>\Delta c_{t,i} &#x3D; \frac{c_{t+1,i}-c_{t-1，i}}{2}<br>$$<br>After obtaining 13 MFCC delta features, we can perform the same transform again to obtain another 13 MFCC delta-delta features.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate_delta_feature</span>(<span class="hljs-params">feat, n</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Calculate the dynamic mfcc feature</span><br><span class="hljs-string">    :param feat: (ndarray,2d) feature</span><br><span class="hljs-string">    :param n: (int) this should be 1 according to PPT</span><br><span class="hljs-string">    :return: (ndarray,2d) dynamic feature</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    deno = <span class="hljs-number">2</span> * np.<span class="hljs-built_in">sum</span>([i * i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, n + <span class="hljs-number">1</span>)])<br>    feat_padded = np.pad(feat, ((n, n), (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>)), mode=<span class="hljs-string">&quot;edge&quot;</span>)<br>    d_feat = np.zeros_like(feat)<br>    weight = np.arange(-n, n + <span class="hljs-number">1</span>)<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(feat.shape[<span class="hljs-number">0</span>]):<br>        d_feat[i] = np.dot(weight, feat_padded[i: i + <span class="hljs-number">2</span> * n + <span class="hljs-number">1</span>]) / deno<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Calculating Dynamic Feature: done&quot;</span>)<br>    <span class="hljs-keyword">return</span> d_feat<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="8-Feature-Transformation-Feature-Normalization"><a href="#8-Feature-Transformation-Feature-Normalization" class="headerlink" title="8. Feature Transformation (Feature Normalization)"></a>8. Feature Transformation (Feature Normalization)</h3><p>Finally, we obtain 39-dimension MFCC features. However, the differences between data induce the uncertainty. To eliminate the mismatch between training and test, feature normalization is introduced.</p>
+<p>There are several kinds of normalization, including Cepstral Mean Normalization (CMN), Cepstral Variance Normalization (CVN) and Cepstral Mean and Variance Normalization (CMVN). In this assignment, CMVN is adopted. </p>
+<p>The CMVN formula given in the PPT:<br>$$<br>\hat{y_t}(j)&#x3D;\frac{y_t(j)-\mu(\bold{y}(j))}{\sigma(\bold{y}(j))}<br>$$<br>According to references <sup><code>[1][2]</code> </sup>, the formula can be also written as.<br>$$<br>feature(t,i)&#x3D;\frac{feature(t,i)-\frac{1}{T}\sum_{k&#x3D;0}^{T}feature(k,i)}{\sqrt{\frac{1}{T-1}\sum_{j&#x3D;0}^{T}((feature(t,i)-\frac{1}{T}\sum_{k&#x3D;0}^{T}feature(k,i))^2)}}<br>$$<br>The formula shows each feature is normalized individually.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">feature_concatenate_normalisation</span>(<span class="hljs-params">feature</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Concatenate vectors of features, and perform Cesptral Variance &amp; Mean Normalization (CVMN)</span><br><span class="hljs-string">    on the matrix. The normalization formula coincides with the one given in the PPT</span><br><span class="hljs-string">    To specific the range and details of the normalization, following papers are referenced</span><br><span class="hljs-string">     - Chen C P , Bilmes J , Kirchhoff K . Low-Resource Noise-Robust Feature Post-Processing On Aurora 2.0. 2002.</span><br><span class="hljs-string">     - Chapaneri S V , Chapaneri S V . Spoken Digits Recognition using Weighted MFCC and Improved Features for Dynamic</span><br><span class="hljs-string">       Time Warping[J]. International Journal of Computer Applications, 2012, 40(3):6-12.</span><br><span class="hljs-string">    :param feature: (ndarray,tuple,list) MFCC feature or the delta feature</span><br><span class="hljs-string">    :return: (ndarray) Concatenated matrix of MFCC feature. Each row contains a frame, and each column</span><br><span class="hljs-string">     contains a CMVN-normalized feature</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-comment"># First, concatenate features to generate the feature matrix</span><br>    <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(feature, <span class="hljs-built_in">tuple</span>) <span class="hljs-keyword">or</span> <span class="hljs-built_in">isinstance</span>(feature, <span class="hljs-built_in">list</span>):<br>        feature_f = np.array(feature)<br>    <span class="hljs-keyword">else</span>:<br>        feature_f = feature<br>    feature_shape = feature_f.shape<br>    numbers = feature_shape[<span class="hljs-number">0</span>]<br>    concat_list = []<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(numbers):<br>        concat_list.append(feature_f[i])<br>    concat_tuple = <span class="hljs-built_in">tuple</span>(concat_list)<br>    concat_matrix = np.concatenate(concat_tuple, axis=<span class="hljs-number">1</span>)<br>    <span class="hljs-comment"># Then, perform Cesptral Variance &amp; Mean Normalization (CVMN) on each feature.</span><br>    feature_count = concat_matrix.shape[<span class="hljs-number">1</span>]<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(feature_count):<br>        feature_mean = np.mean(concat_matrix[:, i])<br>        feature_std_var = np.std(concat_matrix[:, i], ddof=<span class="hljs-number">1</span>)<br>        concat_matrix[:, i] = (concat_matrix[:, i] - feature_mean) / feature_std_var<br>    <span class="hljs-keyword">return</span> concat_matrix<br></code></pre></td></tr></table></figure>
+
+<p>Finally, the 39-dimensional feature of “Ni Hao” is obtained.</p>
+<h3 id="Bibliography"><a href="#Bibliography" class="headerlink" title="Bibliography"></a>Bibliography</h3><blockquote>
+<p>[1] Chen C P , Bilmes J , Kirchhoff K . Low-Resource Noise-Robust Feature Post-Processing On Aurora 2.0. 2002.</p>
+<p>[2] Chapaneri S V , Chapaneri S V . Spoken Digits Recognition using Weighted MFCC and Improved Features for Dynamic Time Warping[J]. International Journal of Computer Applications, 2012, 40(3):6-12.</p>
+</blockquote>
+<h3 id="Appendix"><a href="#Appendix" class="headerlink" title="Appendix"></a>Appendix</h3><h4 id="A-1-Main-Procedure"><a href="#A-1-Main-Procedure" class="headerlink" title="A.1  Main Procedure"></a>A.1  Main Procedure</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># Read audio &amp; Pre-emphasis</span><br>sampling_freq, audio = audio_read(<span class="hljs-string">&quot;hello_1950641.wav&quot;</span>, <span class="hljs-literal">True</span>)<br>audio, audio_original = audio_preemphasis(audio)<br>audio_sequence_visualize(audio_original, <span class="hljs-string">&quot;Original Signal&quot;</span>, <span class="hljs-number">0</span>)<br>audio_sequence_visualize(audio, <span class="hljs-string">&quot;Pre-emphasized Signal&quot;</span>, <span class="hljs-number">1</span>)<br>audio_frequency_visualize(audio_original,sampling_freq,<span class="hljs-string">&quot;Frequency Components (Original)&quot;</span>)<br>audio_frequency_visualize(audio,sampling_freq,<span class="hljs-string">&quot;Frequency Components (Pre-emphasized)&quot;</span>)<br><br><span class="hljs-comment"># Windowing (Padding Zero)</span><br>frame, frame_count, frame_size = audio_windowing(audio, sampling_freq)<br><br><span class="hljs-comment"># Short-time Fourier Transformation (STFT)</span><br>frame_stft, fft_bins = audio_fft(frame, frame_count)<br>audio_spectrogram_visualize(frame_stft, fft_bins // <span class="hljs-number">2</span> + <span class="hljs-number">1</span>, sampling_freq)<br><br><span class="hljs-comment"># Get Mel Filter Banks</span><br>mel_filter_banks = get_mel_filter_banks(sampling_freq, fft_bins, MEL_FILTERS, <span class="hljs-number">300</span>, sampling_freq // <span class="hljs-number">2</span>)<br>visualize_mel_filter_bank(mel_filter_banks)<br><br><span class="hljs-comment"># Apply Mel Filter &amp; Log</span><br>feat, energy = get_feat_and_energy(frame_stft, mel_filter_banks)<br>log_feat = np.log(feat)<br>feat_spectrogram_visualize(log_feat)<br><br><span class="hljs-comment"># Apply Discrete Cosine Transformation (DCT)</span><br>dct_result = audio_dct(log_feat)<br>dct_result[:,<span class="hljs-number">0</span>] = energy<br>cepstrum_spectrogram_visualize(dct_result, <span class="hljs-number">5</span>, <span class="hljs-string">&quot;MFCC Result&quot;</span>)<br><br><span class="hljs-comment"># Calculate Dynamic Features</span><br>feat_order_1 = calculate_delta_feature(dct_result, <span class="hljs-number">1</span>)<br>feat_order_2 = calculate_delta_feature(feat_order_1, <span class="hljs-number">1</span>)<br>feature_spectrogram_visualize(feat_order_1, <span class="hljs-number">6</span>, <span class="hljs-string">&quot;Dynamic Feature (Order 1)&quot;</span>)<br>feature_spectrogram_visualize(feat_order_2, <span class="hljs-number">7</span>, <span class="hljs-string">&quot;Dynamic Feature (Order 2)&quot;</span>)<br><br><span class="hljs-comment"># Feature Normalization</span><br>feature_vector = feature_concatenate_normalisation((dct_result, feat_order_1, feat_order_2))<br>feature_spectrogram_visualize(feature_vector, <span class="hljs-number">8</span>, <span class="hljs-string">&quot;Normalized Feature Matrix&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="A-2-Audio-Spectrogram-Visualization"><a href="#A-2-Audio-Spectrogram-Visualization" class="headerlink" title="A.2 Audio Spectrogram Visualization"></a>A.2 Audio Spectrogram Visualization</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_spectrogram_visualize</span>(<span class="hljs-params">frame_window_transformed, frame_size, sampling_freq, subplot_id=<span class="hljs-number">2</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize the spectrogram</span><br><span class="hljs-string">    :param subplot_id: (int) subplot location to be shown</span><br><span class="hljs-string">    :param frame_window_transformed: (ndarray,2d) DFT-transformed matrix of audio data</span><br><span class="hljs-string">    :param frame_size: (int) size of windowing frames</span><br><span class="hljs-string">    :param sampling_freq: (int) sampling frequency of the original audio</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-comment"># Preparing for the coordinates</span><br>    frame_window_trans_crop = frame_window_transformed[:, :frame_window_transformed.shape[<span class="hljs-number">1</span>]]<br>    yt = np.linspace(<span class="hljs-number">0</span>, frame_size, <span class="hljs-number">10</span>)<br>    xt = np.linspace(<span class="hljs-number">0</span>, frame_window_transformed.shape[<span class="hljs-number">0</span>], <span class="hljs-number">10</span>)<br>    s = sampling_freq // <span class="hljs-number">2</span> / frame_size * yt<br>    r = FRAME_SHIFT_MS * np.linspace(<span class="hljs-number">0</span>, frame_window_transformed.shape[<span class="hljs-number">0</span>], <span class="hljs-number">10</span>)<br>    r = r.astype(<span class="hljs-string">&quot;int&quot;</span>)<br>    s = s.astype(<span class="hljs-string">&quot;int&quot;</span>)<br>    <span class="hljs-comment"># The following conversion transforms the unit to decibel</span><br>    test = np.log10(frame_window_trans_crop.T+np.finfo(<span class="hljs-string">&quot;float&quot;</span>).eps) * <span class="hljs-number">10</span><br>    visualize_subplot(subplot_id)<br>    plt.pcolormesh(test)<br>    plt.yticks(yt, s)<br>    plt.ylabel(<span class="hljs-string">&quot;Frequency (Hz)&quot;</span>)<br>    plt.xticks(xt, r)<br>    plt.xlabel(<span class="hljs-string">&quot;Time (ms)&quot;</span>)<br>    cbar = plt.colorbar()<br>    cbar.ax.set_ylabel(<span class="hljs-string">&quot;Decibel (dB)&quot;</span>)<br>    plt.title(<span class="hljs-string">&quot;Acoustic Spectrogram&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="A-3-Frequency-Component-Visualization"><a href="#A-3-Frequency-Component-Visualization" class="headerlink" title="A.3 Frequency Component Visualization"></a>A.3 Frequency Component Visualization</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_frequency_visualize</span>(<span class="hljs-params">audio_sequence, sampling_rate,title=<span class="hljs-string">&quot;Frequency Components of Audio Sequence&quot;</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize frequency components of an audio segment</span><br><span class="hljs-string">    :param audio_sequence: (ndarray) audio segment</span><br><span class="hljs-string">    :param sampling_rate: (int) sampling rate</span><br><span class="hljs-string">    :param title: (str) title to be shown</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    freq_amp = np.<span class="hljs-built_in">abs</span>(np.fft.rfft(audio_sequence,<span class="hljs-number">512</span>)) ** <span class="hljs-number">2</span><br>    fftbins=<span class="hljs-number">512</span><br>    st = [sampling_rate // <span class="hljs-number">2</span> / fftbins * i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(freq_amp.shape[<span class="hljs-number">0</span>])]<br>    visualize_subplot(<span class="hljs-number">0</span>)<br>    plt.xlabel(<span class="hljs-string">&quot;Frequency (Hz)&quot;</span>)<br>    plt.ylabel(<span class="hljs-string">&quot;Accumulated Energy (dB)&quot;</span>)<br>    plt.title(title)<br>    freq_amp = np.log10(freq_amp+np.finfo(<span class="hljs-string">&quot;float&quot;</span>).eps)*<span class="hljs-number">10</span><br>    plt.plot(st, freq_amp)<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="A-4-Mel-filter-Bank-Visualization"><a href="#A-4-Mel-filter-Bank-Visualization" class="headerlink" title="A.4 Mel-filter Bank Visualization"></a>A.4 Mel-filter Bank Visualization</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_mel_filter_bank</span>(<span class="hljs-params">mel_filter_bank</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize Mel filter bank via plot graph</span><br><span class="hljs-string">    :param mel_filter_bank:(ndarray,2d) Mel filter bank matrix</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    fft_bins = mel_filter_bank.shape[<span class="hljs-number">1</span>]<br>    mel_filters = mel_filter_bank.shape[<span class="hljs-number">0</span>]<br>    x_axis = np.array([i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(fft_bins)])<br>    visualize_subplot(<span class="hljs-number">3</span>)<br>    plt.title(<span class="hljs-string">&quot;Mel Filter Banks&quot;</span>)<br>    plt.xlabel(<span class="hljs-string">&quot;FFT bin&quot;</span>)<br>    plt.ylabel(<span class="hljs-string">&quot;Scale Factor&quot;</span>)<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(mel_filters):<br>        plt.plot(x_axis, mel_filter_bank[i, :])<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="A-5-Feature-Visualization"><a href="#A-5-Feature-Visualization" class="headerlink" title="A.5 Feature Visualization"></a>A.5 Feature Visualization</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">feat_spectrogram_visualize</span>(<span class="hljs-params">feat</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize feature via color map graph</span><br><span class="hljs-string">    :param feat: (ndarray,2d) feature matrix</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    feat_crop = feat[:, :feat.shape[<span class="hljs-number">1</span>]]<br>    xt = np.linspace(<span class="hljs-number">0</span>, feat.shape[<span class="hljs-number">0</span>], <span class="hljs-number">10</span>)<br>    r = FRAME_SHIFT_MS * np.linspace(<span class="hljs-number">0</span>, feat.shape[<span class="hljs-number">0</span>], <span class="hljs-number">10</span>)<br>    r = r.astype(<span class="hljs-string">&quot;int&quot;</span>)<br>    test = feat_crop.T<br>    visualize_subplot(<span class="hljs-number">4</span>)<br>    plt.pcolormesh(test)<br>    plt.ylabel(<span class="hljs-string">&quot;Mel-Filter Results&quot;</span>)<br>    plt.xticks(xt, r)<br>    plt.xlabel(<span class="hljs-string">&quot;Time (ms)&quot;</span>)<br>    plt.colorbar()<br>    plt.title(<span class="hljs-string">&quot;Feat Spectrogram&quot;</span>)<br>    <br>    <br><span class="hljs-keyword">def</span> <span class="hljs-title function_">cepstrum_spectrogram_visualize</span>(<span class="hljs-params">feat, subplot_id=<span class="hljs-number">5</span>, title=<span class="hljs-string">&quot;Cepstrum Color Map&quot;</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize cepstrum via color map graph</span><br><span class="hljs-string">    :param title: (str) title to be shown</span><br><span class="hljs-string">    :param subplot_id: (int) subplot location</span><br><span class="hljs-string">    :param feat:(ndarray,2d) cepstrum matrix</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    feat_crop = feat[:, :feat.shape[<span class="hljs-number">1</span>]]<br>    xt = np.linspace(<span class="hljs-number">0</span>, feat.shape[<span class="hljs-number">0</span>], <span class="hljs-number">5</span>)<br>    r = FRAME_SHIFT_MS * np.linspace(<span class="hljs-number">0</span>, feat.shape[<span class="hljs-number">0</span>], <span class="hljs-number">5</span>)<br>    r = r.astype(<span class="hljs-string">&quot;int&quot;</span>)<br>    test = feat_crop.T<br>    visualize_subplot(subplot_id)<br>    plt.pcolormesh(test)<br>    plt.ylabel(<span class="hljs-string">&quot;Cepstrum&quot;</span>)<br>    plt.xticks(xt, r)<br>    plt.xlabel(<span class="hljs-string">&quot;Time (ms)&quot;</span>)<br>    plt.colorbar()<br>    plt.title(title)<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">feature_spectrogram_visualize</span>(<span class="hljs-params">feat, subplot_id=<span class="hljs-number">5</span>, title=<span class="hljs-string">&quot;Feature Map&quot;</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize cepstrum via color map graph</span><br><span class="hljs-string">    :param title: (str) title to be shown</span><br><span class="hljs-string">    :param subplot_id: (int) subplot location</span><br><span class="hljs-string">    :param feat:(ndarray,2d) cepstrum matrix</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    feat_crop = feat[:, :feat.shape[<span class="hljs-number">1</span>]]<br>    xt = np.linspace(<span class="hljs-number">0</span>, feat.shape[<span class="hljs-number">0</span>], <span class="hljs-number">5</span>)<br>    r = FRAME_SHIFT_MS * np.linspace(<span class="hljs-number">0</span>, feat.shape[<span class="hljs-number">0</span>], <span class="hljs-number">5</span>)<br>    r = r.astype(<span class="hljs-string">&quot;int&quot;</span>)<br>    test = feat_crop.T<br>    visualize_subplot(subplot_id)<br>    plt.pcolormesh(test)<br>    plt.ylabel(<span class="hljs-string">&quot;Feature&quot;</span>)<br>    plt.xticks(xt, r)<br>    plt.xlabel(<span class="hljs-string">&quot;Time (ms)&quot;</span>)<br>    plt.colorbar()<br>    plt.title(title)<br><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="A-6-Audio-Waveform-Graph-Visualization"><a href="#A-6-Audio-Waveform-Graph-Visualization" class="headerlink" title="A.6 Audio Waveform Graph Visualization"></a>A.6 Audio Waveform Graph Visualization</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">audio_sequence_visualize</span>(<span class="hljs-params">audio_sequence, title, subplot_id</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Visualize the audio sequence in a plot diagram</span><br><span class="hljs-string">    :param subplot_id: (int) location of subplot</span><br><span class="hljs-string">    :param audio_sequence: (ndarray,1d) audio sequence read</span><br><span class="hljs-string">    :param title: (str) title to be shown in the graph</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    visualize_subplot(subplot_id)<br>    x_axis = np.array([i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(audio_sequence))])<br>    plt.plot(x_axis, audio_sequence)<br>    plt.xlabel(<span class="hljs-string">&quot;Sample Points&quot;</span>)<br>    plt.ylabel(<span class="hljs-string">&quot;Amplitude&quot;</span>)<br>    plt.title(title)<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="A-7-Running-Environment"><a href="#A-7-Running-Environment" class="headerlink" title="A.7 Running Environment"></a>A.7 Running Environment</h4><p>Recommended running environment:</p>
+<ul>
+<li>Python 3.9</li>
+<li>NumPy 1.19.5</li>
+<li>SciPy 1.7.0</li>
+<li>Matplotlib 3.4.2</li>
+<li>Jupyter 1.0.0 (Jupyter Notebook)</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>(ML/ASR) Speech Signal Analysis</div>
+      <div>https://aeroraven.github.io/2020/10/10/speech-signal-analysis/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Aeroraven</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>October 10, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - Non-commercial">
+                    <i class="iconfont icon-nc"></i>
+                  </span>
+                </a>
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - Share-alike">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
