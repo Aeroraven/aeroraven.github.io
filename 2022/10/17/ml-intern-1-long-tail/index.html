@@ -1,0 +1,710 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Aeroraven">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="对样本分布不平衡的问题的解决方法的相关论文调研">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(ML&#x2F;CV) 样本分布不平衡的问题的解决策略调研">
+<meta property="og:url" content="https://aeroraven.github.io/2022/10/17/ml-intern-1-long-tail/index.html">
+<meta property="og:site_name" content="Aeroraven">
+<meta property="og:description" content="对样本分布不平衡的问题的解决方法的相关论文调研">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-10-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-17T15:22:11.925Z">
+<meta property="article:author" content="Aeroraven">
+<meta property="article:tag" content="(CS)Computer Vision">
+<meta property="article:tag" content="(CS)Machine Learning">
+<meta property="article:tag" content="(MI)Intern">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>(ML/CV) 样本分布不平衡的问题的解决策略调研 - Aeroraven</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"aeroraven.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Aeroraven</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="(ML/CV) 样本分布不平衡的问题的解决策略调研"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-17 00:00" pubdate>
+          October 17, 2022 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.1k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          35 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">(ML/CV) 样本分布不平衡的问题的解决策略调研</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="1-基于Re-weighting-Loss加权-的方法"><a href="#1-基于Re-weighting-Loss加权-的方法" class="headerlink" title="1. 基于Re-weighting (Loss加权) 的方法"></a>1. 基于Re-weighting (Loss加权) 的方法</h2><p>这一类方法通过修正不同类别的Loss权重，达成对长尾分布中尾部类别的补偿</p>
+<h3 id="1-1-Class-Balanced-Loss-Based-on-Effective-Number-of-Samples-CVPR2019"><a href="#1-1-Class-Balanced-Loss-Based-on-Effective-Number-of-Samples-CVPR2019" class="headerlink" title="1.1 Class-Balanced Loss Based on Effective Number of Samples (CVPR2019)"></a>1.1 Class-Balanced Loss Based on Effective Number of Samples (CVPR2019)</h3><h4 id="研究动机"><a href="#研究动机" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>解决长尾分布的通常方法包括重采样(Re-sampling)和Loss加权&#x2F;重加权(Re-weighting)两种方法。对于重采样，对头部分类(主要类别)欠采样可能导致丢弃有价值的样本，而过采样会导致引入重复样本，造成过拟合或者延长训练时间。因此Re-weighting的方法更好</li>
+<li>通常对Loss加权的权重 $w_i$反比与类别的$i$样本数量$c_i$，但是已有证明这样效果不好。因此，一种新的Re-weighting的方法对于处理长尾问题有价值</li>
+</ul>
+<h4 id="主要贡献"><a href="#主要贡献" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
+<li>提出了一种基于Reweighting的长尾训练方法，使用“有效样本数量” (Effective Number of Samples)设计Loss中关于分类的加权项(即class-balance term)的取值。</li>
+<li>在常用的Loss函数（如Sigmoid交叉熵、Softmax交叉熵、Focal Loss等）前附加上述的加权系数，就能够实现较好的性能提升。</li>
+</ul>
+<h4 id="算法内容"><a href="#算法内容" class="headerlink" title="算法内容"></a>算法内容</h4><p><strong>问题定义</strong></p>
+<p>​	作者将采样过程定义为一个简化的随机覆盖问题。数据集中的样本不再被看成一个单独的点，而是被看做一个小块的区域。即每一个样本可能和其它的样本之间有一定概率重合。设同一类的样本在特征空间中构成的集合为$S$，容量(原文是Volume，这里翻译可能不正确)是$N$，每一个其中样本具有单位容量$1$。</p>
+<p>​	有效样本数量(Effective number of samples)定义为集合的期望容量。</p>
+<p>​	采样过程被定义为一个覆盖过程，一个新采样的样本有$p$概率在已经采样的样本构成的集合中，有$(1-p)$概率在其之外。另外类别中样本越多，新采样的样本被已采样的样本覆盖的可能性更高。这里的覆盖表征的是同一类别中两个不同样本的相似性，$N$越大，表示着$S$中原始的独特样本越多（即数据增强之前的差别大的样本）。</p>
+<p><strong>系数计算</strong></p>
+<p>​	定义 $E_n$为采样$S$中$n$个样本时，获得的期望有效样本数量的个数，那么可以根据数学归纳法推出<br>$$<br>E_n&#x3D;\frac{1-\beta^n}{1-\beta}<br>$$<br>​	其中超参$\beta&#x3D;(N-1)&#x2F;N$，如果$\beta\to1$表示类别中每一个样本都是独一无二的；反之$\beta\to0$表示所有样本都重叠。</p>
+<p><strong>修正Loss</strong></p>
+<p>​	在实践中，对于每一个类别需要设定一个$N_i,\beta_i$，但是实现起来不方便（超参不好确定），因此可以对一个数据集下的所有类别使用同一个超参$N$和$\beta$。设$n_i$为第$i$类的样本数，则定义权重参数$c_i$<br>$$<br>c_i&#x3D;\frac{1}{E_{n_i}}<br>$$<br>​	保证Loss的尺度在加上权重项和之前一样，对其归一化得到规范化权重参数$\alpha_i$，其中$C$是总共类别数量<br>$$<br>\alpha_i&#x3D;\frac{c_iC}{\sum_{i&#x3D;1}^C c_i}<br>$$<br>​	在原有Loss前附加一个修正项$\alpha_i$即得到类平衡(Class-balanced)修正后的Loss函数。比如Class-balanced Softmax如下<br>$$<br>CB_{softmax}(\mathbf{z},y)&#x3D;-\alpha_{n_y}\log\left(\frac{\exp(z_y)}{\sum_{i&#x3D;1}^C\exp(z_i)}\right)<br>$$</p>
+<h4 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h4><p>在Longtail CIFAR-10上，使用超参$\beta&#x3D;0.9999$，约降低使用系数之前3%的错误率。</p>
+<p>在Longtail CIFAR-100上，使用超参$\beta&#x3D;0.99$和FocalLoss或Sigmoid时，降低使用系数之前1%错误率</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p><strong>PyTorch:</strong> <a target="_blank" rel="noopener" href="https://github.com/vandit15/Class-balanced-loss-pytorch">https://github.com/vandit15/Class-balanced-loss-pytorch</a></p>
+<h3 id="1-2-Distributional-Robustness-Loss-for-Long-tail-Learning-ICCV2021"><a href="#1-2-Distributional-Robustness-Loss-for-Long-tail-Learning-ICCV2021" class="headerlink" title="1.2 Distributional Robustness Loss for Long-tail Learning (ICCV2021)"></a>1.2 Distributional Robustness Loss for Long-tail Learning (ICCV2021)</h3><h4 id="研究动机-1"><a href="#研究动机-1" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>传统训练策略遵循最小化经验风险(Empirical Risk Minimization)的策略，缺陷是训练分布和真实(测试)分布一致，这显然是难以实现的。因此，引入Distributionally Robust Optimization (DRO) 能够有效解决长尾问题。（鲁棒性优化还没看）</li>
+<li>将DRO的思想引入到长尾Loss的设计上：已有小样本的中心和其实际分布中心差距很大，通过DRO优化可能的最坏情况可以缓解这一问题。</li>
+</ul>
+<h4 id="主要贡献-1"><a href="#主要贡献-1" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
+<li>将数据不平衡下的学习问题，定义为鲁棒性优化问题。</li>
+<li>设计了一个新的Loss，DRO-LT。基于DRO-LT训练能够同时覆盖头部和尾部分类表征</li>
+<li>在CIFAR100-LT等数据集上测试，得到了好的效果。</li>
+</ul>
+<h4 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h4><p><strong>PyTorch</strong>: <a target="_blank" rel="noopener" href="https://github.com/dvirsamuel/DRO-LT">https://github.com/dvirsamuel/DRO-LT</a></p>
+<h3 id="1-3-Asymmetric-Loss-For-Multi-Label-Classification-ICCV2021"><a href="#1-3-Asymmetric-Loss-For-Multi-Label-Classification-ICCV2021" class="headerlink" title="1.3 Asymmetric Loss For Multi-Label Classification (ICCV2021)"></a>1.3 Asymmetric Loss For Multi-Label Classification (ICCV2021)</h3><h4 id="研究动机-2"><a href="#研究动机-2" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>多任务语境下正负标签数量不均衡，一张图可能有几个Positive的标签，但是有很多Negative的标签。（Positive-negative imbalance）</li>
+</ul>
+<h4 id="主要贡献-2"><a href="#主要贡献-2" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
+<li>提出了基于Positive-negative imbalance和解决Groundtruth错误标签(Mis-labeling)的“非对称Loss” (Asymmetric Loss, ASL)</li>
+<li>研究了ASL的性质，提出了控制Loss超参的一些方法</li>
+<li>在MS-COCO数据集上取得了更好的效果，且不需要花费额外推理和训练时间</li>
+</ul>
+<h4 id="算法定义"><a href="#算法定义" class="headerlink" title="算法定义"></a>算法定义</h4><p><strong>非对称聚焦</strong></p>
+<p>​	类比于Focal Loss的$\gamma$值，作者将其对正负样本解耦，即定义$\gamma_+$和$\gamma_-$，之后正类别Loss$L_+$和负类别Loss$L_-$定义为<br>$$<br>L_+&#x3D;(1-p)^{\gamma_+}\log(p);L_-&#x3D;p^{\gamma_-}\log(1-p)<br>$$<br>​	根据经验，有约束$\gamma_-&gt;\gamma_+$。解耦有效地降低了低概率情况下，负样本对</p>
+<p><strong>非对称概率分布偏移</strong></p>
+<p>​	由于多标签分类中的不平衡程度可能非常高，因此这种衰减(非对称聚焦)并不总是足够的。基于此，作者提出了额外的非对称机制，即非对称概率偏移。记偏移后的概率是$p_m$，则<br>$$<br>p_m&#x3D;\max(p-m,0)<br>$$<br><strong>ASL定义</strong></p>
+<p>​	基于以上的非对称机制，可以定义ASL函数，即<br>$$<br>L_+&#x3D;(1-p)^{\gamma_+}\log(p);L_-&#x3D;p^{\gamma_-}_m\log(1-p_m)<br>$$</p>
+<h4 id="实验结果-1"><a href="#实验结果-1" class="headerlink" title="实验结果"></a>实验结果</h4><p>​	在MS-COCO数据集上较原有的SOTA模型，mAP提高2.8%；Pascal-VOC上，较原有SOTA模型，mAP提高0.6%；</p>
+<h4 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h4><p><strong>PyTorch</strong>： <a target="_blank" rel="noopener" href="https://github.com/Alibaba-MIIL/ASL">https://github.com/Alibaba-MIIL/ASL</a></p>
+<h2 id="2-基于Re-sample-重采样-的方法"><a href="#2-基于Re-sample-重采样-的方法" class="headerlink" title="2. 基于Re-sample (重采样) 的方法"></a>2. 基于Re-sample (重采样) 的方法</h2><p>这一类方法通过修正采样时不同类别的采样概率，达成对长尾分布中尾部类别的补偿</p>
+<h3 id="2-1-Decoupling-representation-and-classifier-for-long-tailed-recognition-ICLR2020"><a href="#2-1-Decoupling-representation-and-classifier-for-long-tailed-recognition-ICLR2020" class="headerlink" title="2.1 Decoupling representation and classifier for long-tailed recognition (ICLR2020)"></a>2.1 Decoupling representation and classifier for long-tailed recognition (ICLR2020)</h3><h4 id="研究动机-3"><a href="#研究动机-3" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>已有研究缺乏对长尾学习效果的分析——一个好的模型来自于其更好的表征，还是通过对分类器中决策边界的移动达到对不平衡类别更好的效果。因此作者将模型训练拆成了特征学习和分类两部分，进行实验。</li>
+</ul>
+<h4 id="主要贡献-3"><a href="#主要贡献-3" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
+<li>全程对分类器按照Class-balanced的方式采样（即每一个类别采样概率相同），效果不一定好。</li>
+<li>对一个训练好的Joint Model（即原有模型，包括特征提取部分+分类器）的分类器按Class-Balanced进行Retrain效果更好。</li>
+<li>将这个训练策略应用到常见模型上，在ImageNet-LT，Places-LT，iNaturalist上效果超出已有的SOTA模型</li>
+</ul>
+<h4 id="算法内容-1"><a href="#算法内容-1" class="headerlink" title="算法内容"></a>算法内容</h4><p><strong>采样策略定义</strong></p>
+<p>一个类别$j$中的样本被采样到的概率定义如下，其中$n_j^q$表示第$j$类中的样本数量，$C$为类别数量。<br>$$<br>p_j&#x3D;\frac{n_j^q}{\sum_{i&#x3D;1}^Cn_i^q}<br>$$<br>参数$q$则定义了采样策略。对于$q&#x3D;1$，则每一个样本有均等概率取得，此时采样策略是Instance-balanced（基于实例平衡的）的；对于$q&#x3D;0$，则每一个类别有均等概率取得，此时采样策略是Class-balanced（基于类别平衡的）的。中间值则是这两种方法的混合。</p>
+<p><strong>分类器调整策略定义</strong></p>
+<p>将联合模型（Joint Model，即原有模型，包括特征提取部分+分类器）训练好后，冻结特征提取部分网络参数，调整分类器参数的过程称为分类器的调整。作者给出了三种调整策略。</p>
+<ul>
+<li>**分类器重训练 Classfier Re-training (cRT)**：按照Class-balanced策略对分类器参数重置后训练</li>
+<li>**最近类别均值分类器 Nearset Class Mean classifier (NCM)**：先使用训练集计算出个类别的中心 feature tensor，然后每次做预测的时候使用 cosine similarity或者 MSE loss计算出每个样本离这些中心feature的距离。</li>
+<li><strong>τ-normalized classifier</strong> ：给最后一层的分类器加上正则限制，防止其都预测成类别多的那类。即对第$i$类的分类器参数$w_i$除以$w_i$对的$\tau$范数</li>
+</ul>
+<h4 id="实验结果-2"><a href="#实验结果-2" class="headerlink" title="实验结果"></a>实验结果</h4><p>对于长尾类别，使用Instance-balanced的方法对联合模型训练完后，使用cRT或者τ-norm的方法进行分类器调整效果最好，提高的精确度达到25%左右；对于整体，准确率提升在5%左右。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/CS-Computer-Vision/">#(CS)Computer Vision</a>
+      
+        <a href="/tags/CS-Machine-Learning/">#(CS)Machine Learning</a>
+      
+        <a href="/tags/MI-Intern/">#(MI)Intern</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>(ML/CV) 样本分布不平衡的问题的解决策略调研</div>
+      <div>https://aeroraven.github.io/2022/10/17/ml-intern-1-long-tail/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Aeroraven</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>October 17, 2022</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - Non-commercial">
+                    <i class="iconfont icon-nc"></i>
+                  </span>
+                </a>
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - Share-alike">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/02/23/cg-course-1-raytracing/" title="(CG) 基于WebGL实现的光线追踪渲染">
+                        <span class="hidden-mobile">(CG) 基于WebGL实现的光线追踪渲染</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
