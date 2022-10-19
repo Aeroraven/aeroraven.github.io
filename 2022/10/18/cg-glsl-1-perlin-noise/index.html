@@ -1,0 +1,704 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Aeroraven">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="在Canvas上绘制噪声图片">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GLSL From Scratch 01 - Perlin噪声生成">
+<meta property="og:url" content="https://aeroraven.github.io/2022/10/18/cg-glsl-1-perlin-noise/index.html">
+<meta property="og:site_name" content="Aeroraven">
+<meta property="og:description" content="在Canvas上绘制噪声图片">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-10-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-19T14:54:09.728Z">
+<meta property="article:author" content="Aeroraven">
+<meta property="article:tag" content="(CS)Computer Graphics">
+<meta property="article:tag" content="(SE)WebGL">
+<meta property="article:tag" content="(MI)Leisure">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>GLSL From Scratch 01 - Perlin噪声生成 - Aeroraven</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"aeroraven.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Aeroraven</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="GLSL From Scratch 01 - Perlin噪声生成"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-18 00:00" pubdate>
+          October 18, 2022 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.4k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          37 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">GLSL From Scratch 01 - Perlin噪声生成</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="0-在线-Demo"><a href="#0-在线-Demo" class="headerlink" title="0. 在线 Demo"></a>0. 在线 Demo</h3><p>Value Noise: <a href="https://aeroraven.github.io/altina-cg-a/index.html?stage=value_noise">https://aeroraven.github.io/altina-cg-a/index.html?stage=value_noise</a></p>
+<p>Perlin Noise: <a href="https://aeroraven.github.io/altina-cg-a/index.html?stage=perlin_noise">https://aeroraven.github.io/altina-cg-a/index.html?stage=perlin_noise</a></p>
+<h3 id="1-伪随机数生成"><a href="#1-伪随机数生成" class="headerlink" title="1. 伪随机数生成"></a>1. 伪随机数生成</h3><p>Shader中不提供随机数函数，要实现随机数的效果，只能够定义一个函数$y&#x3D;f(x)$，通过设计$f$，使其输入和输出看起来随机。常用生成函数类似于下列形式：<br>$$<br>y&#x3D;fract(sin(ax+b)*c)<br>$$<br>其中$a,b,c$为自定义参数，$fract$为取小数函数</p>
+<p>除了自变量外的参数构成这一个“随机数”生成器的“种子”。参数固定后，对于固定的输入，函数总是提供固定输出。实践中的输入$x$可以是世界坐标等等任意值，只要确保一个每一个像素的输入$x$不同即可。</p>
+<p>上述的函数并不是唯一的，可以任意设置，只要看起来有随机性就行</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-type">float</span> randomScalar(<span class="hljs-type">vec3</span> worldPos)&#123;<br>    <span class="hljs-type">float</span> d = <span class="hljs-built_in">dot</span>(<span class="hljs-type">vec3</span>(<span class="hljs-number">114.1919</span>, <span class="hljs-number">514.810</span>, <span class="hljs-number">37.719</span>),<span class="hljs-built_in">sin</span>(worldPos));<br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">fract</span>(<span class="hljs-built_in">sin</span>(d)*<span class="hljs-number">114514.1919810</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-白噪声-White-Noise"><a href="#2-白噪声-White-Noise" class="headerlink" title="2. 白噪声 White Noise"></a>2. 白噪声 White Noise</h3><p>有了随机函数，很容易就能生成白噪声图片。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-meta">#version 300 es</span><br><br><span class="hljs-keyword">precision</span> <span class="hljs-keyword">highp</span> <span class="hljs-type">float</span>;<br><br><span class="hljs-keyword">in</span> <span class="hljs-keyword">highp</span> <span class="hljs-type">vec3</span> vPos;<br><br><span class="hljs-keyword">out</span> <span class="hljs-type">vec4</span> fragmentColor;<br><br><span class="hljs-type">float</span> randomScalar(<span class="hljs-type">vec3</span> worldPos)&#123;<br>    <span class="hljs-type">float</span> d = <span class="hljs-built_in">dot</span>(<span class="hljs-type">vec3</span>(<span class="hljs-number">114.1919</span>, <span class="hljs-number">514.810</span>, <span class="hljs-number">37.719</span>),<span class="hljs-built_in">sin</span>(worldPos));<br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">fract</span>(<span class="hljs-built_in">sin</span>(d)*<span class="hljs-number">114514.1919810</span>);<br>&#125;<br><br><span class="hljs-type">void</span> main()&#123;<br>    fragmentColor = <span class="hljs-type">vec4</span>(<span class="hljs-type">vec3</span>(randomScalar(vPos)),<span class="hljs-number">1.0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="3-值噪声-Value-Noise"><a href="#3-值噪声-Value-Noise" class="headerlink" title="3. 值噪声 Value Noise"></a>3. 值噪声 Value Noise</h3><p>但是噪声过于随机，要平滑一点的噪声怎么办呢？这时，就需要一种新的算法了。</p>
+<p>在生成Value Noise前，需要对当前画面划分成$N\times M$个格点，每一个$&lt;i,j&gt;$格点的坐标位于画面位置$P_{i,j}&#x3D;(Wi&#x2F;N,Hj&#x2F;M)$上。按照之前的随机数，为每一个点赋一个随机数，作为噪声强度$M_{i,j}&#x3D;f(P_{i,j})$。（注：此处认为画面长宽均为1）</p>
+<p>Value Noise的思想是，给定一个像素点坐标$P$，找到距离其最近的四个格点坐标，之后按照到这四个点距离进行插值，插值结果作为$P$的噪声强度$M$。</p>
+<p>先来实现第一步，划分格点，确定当前着色像素$P$的邻近四个格点。如下方代码，得到<code>gridMinPos</code>和<code> gridDeltaPos</code>后，四个邻近格点即被确定。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><br><span class="hljs-type">float</span> noiseFunc(<span class="hljs-type">vec3</span> worldPos)&#123;<br>    <span class="hljs-type">float</span> splitPartsf = <span class="hljs-type">float</span>(splitParts);<br>    <span class="hljs-type">vec3</span> magPos = splitPartsf * worldPos;<br>    <span class="hljs-type">vec3</span> gridMinPos = <span class="hljs-built_in">floor</span>(magPos)/splitPartsf;<br>    <span class="hljs-type">vec3</span> gridDeltaPos = <span class="hljs-type">vec3</span>(<span class="hljs-number">1.0</span>,<span class="hljs-number">1.0</span>,<span class="hljs-number">0.0</span>)/splitPartsf;<br>    <span class="hljs-type">vec3</span> gridDist = magPos - <span class="hljs-built_in">floor</span>(magPos);<br>    <br>	...<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>由于随机函数$f$在输入相同时，输出是定值。因此计算出相邻四点噪声强度。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-type">float</span> noise00 = randomScalar(gridMinPos+<span class="hljs-type">vec3</span>(<span class="hljs-number">0.0</span>,<span class="hljs-number">0.0</span>,<span class="hljs-number">0.0</span>));<br><span class="hljs-type">float</span> noise10 = randomScalar(gridMinPos+<span class="hljs-type">vec3</span>(gridDeltaPos.x,<span class="hljs-number">0.0</span>,<span class="hljs-number">0.0</span>));<br><span class="hljs-type">float</span> noise01 = randomScalar(gridMinPos+<span class="hljs-type">vec3</span>(<span class="hljs-number">0.0</span>,gridDeltaPos.y,<span class="hljs-number">0.0</span>));<br><span class="hljs-type">float</span> noise11 = randomScalar(gridMinPos+<span class="hljs-type">vec3</span>(gridDeltaPos.x,gridDeltaPos.y,<span class="hljs-number">0.0</span>));<br></code></pre></td></tr></table></figure>
+
+<p>之后考虑插值问题，最简单插值可以使用线性插值，即<br>$$<br>lerp(s,t,v)&#x3D;(1-v)s+vt,\forall v\in[0,1]^n<br>$$<br>但是有更多方案，对输入$v\in [0,1]^n$，映射至$y&#x3D;g(v)\in[0,1]^n$，此时插值可以写成下列形式。线性插值为$g(n)$是恒等变换时取得。<br>$$<br>lerp(s,t,v)&#x3D;(1-g(v))s+g(v)t,\forall v\in[0,1]^n<br>$$<br>相比于恒等变换，$g(v)$选取有一个更好的方案[1]<br>$$<br>g(v)&#x3D;6t^5-15t^4+10t^3<br>$$<br>这时，我们可以实现这一个插值过程</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-type">float</span> perlinLerp_t(<span class="hljs-type">float</span> x)&#123;<br>    <span class="hljs-type">float</span> x2 = x*x;<br>    <span class="hljs-type">float</span> x3 = x2*x;<br>    <span class="hljs-keyword">return</span> x3*(<span class="hljs-number">6.0</span>*x2<span class="hljs-number">-15.0</span>*x+<span class="hljs-number">10.0</span>);<br>&#125;<br><br><span class="hljs-type">float</span> perlinLerp(<span class="hljs-type">float</span> s,<span class="hljs-type">float</span> t,<span class="hljs-type">float</span> x)&#123;<br>    <span class="hljs-type">float</span> p = perlinLerp_t(x);<br>    <span class="hljs-keyword">return</span> (<span class="hljs-number">1.0</span>-p)*s+p*t;<br>&#125;<br><br><span class="hljs-type">float</span> lerp(<span class="hljs-type">float</span> s,<span class="hljs-type">float</span> t,<span class="hljs-type">float</span> x)&#123;<br>    <span class="hljs-keyword">return</span> perlinLerp(s,t,x);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>之后，即可以实现对四点噪声强度插值</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-type">float</span> noiseXIntp0 = lerp(noise00,noise10,gridDist.x);<br><span class="hljs-type">float</span> noiseXIntp1 = lerp(noise01,noise11,gridDist.x);<br><span class="hljs-type">float</span> noiseYIntp = lerp(noiseXIntp0,noiseXIntp1,gridDist.y);<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-分型值噪声-Fractal-Value-Noise"><a href="#4-分型值噪声-Fractal-Value-Noise" class="headerlink" title="4. 分型值噪声 Fractal Value Noise"></a>4. 分型值噪声 Fractal Value Noise</h3><p>上述噪声函数可以看成$y&#x3D;Noise(x)$，将噪声函数的频率和幅度进行变换，如<br>$$<br>y_n(x)&#x3D;\frac{1}{2^n}Noise(2^nx)<br>$$<br>之后将多个变换结果叠加即可产生分型噪声的效果<br>$$<br>y_f&#x3D;\sum_{i&#x3D;0}^ny_n(x)<br>$$</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><span class="hljs-type">float</span> fractalNoiseFunc(<span class="hljs-type">vec3</span> worldPos)&#123;<br>    <span class="hljs-type">float</span> freq = <span class="hljs-number">1.0</span>;<br>    <span class="hljs-type">float</span> ampl = <span class="hljs-number">1.0</span>;<br>    <span class="hljs-type">float</span> res = <span class="hljs-number">0.0</span>;<br>    <span class="hljs-type">float</span> sampl = <span class="hljs-number">0.0</span>;<br>    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">5</span>;i=i+<span class="hljs-number">1</span>)&#123;<br>        res+=noiseFunc(worldPos*freq)*ampl;<br>        freq = freq*<span class="hljs-number">2.0</span>;<br>        sampl += ampl;<br>        ampl = ampl*<span class="hljs-number">0.5</span>;<br>    &#125;<br>    <span class="hljs-keyword">return</span> res/sampl;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-Perlin-Noise"><a href="#5-Perlin-Noise" class="headerlink" title="5. Perlin Noise"></a>5. Perlin Noise</h3><p>Value Noise直接在格点$&lt;i,j&gt;$上附加噪声强度，而Perlin Noise则在格点$&lt;i,j&gt;$上附加一个随机单位向量$M_{i,j}&#x3D;f(P_{i,j})$</p>
+<p>对于每一个正在着色的像素点$P$，其相邻四个格点坐标记作$P_i,i\in{1,2,3,4}$，则第$i$个格点对$P$而言的噪声强度计算过程如下：</p>
+<ol>
+<li>计算到格点$i$的方向向量，$N_i&#x3D;normalize(P-P_i)$，</li>
+<li>将$P_i$的随机向量$M_i$和$N_i$点乘，得到$P$的噪声强度</li>
+</ol>
+<p>之后，以和值噪声一样的方法进行插值即可</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs glsl"><br><span class="hljs-type">float</span> noiseFunc(<span class="hljs-type">vec3</span> worldPos)&#123;<br>    <span class="hljs-type">float</span> splitPartsf = <span class="hljs-type">float</span>(splitParts);<br>    <span class="hljs-type">vec3</span> magPos = splitPartsf * worldPos;<br>    <span class="hljs-type">vec3</span> gridMinPos = <span class="hljs-built_in">floor</span>(magPos)/splitPartsf;<br>    <span class="hljs-type">vec3</span> gridDeltaPos = <span class="hljs-type">vec3</span>(<span class="hljs-number">1.0</span>,<span class="hljs-number">1.0</span>,<span class="hljs-number">0.0</span>)/splitPartsf;<br>    <span class="hljs-type">vec3</span> gridDist = magPos - <span class="hljs-built_in">floor</span>(magPos);<br>    <br>    <span class="hljs-type">vec3</span> p00 = gridMinPos+<span class="hljs-type">vec3</span>(<span class="hljs-number">0.0</span>,<span class="hljs-number">0.0</span>,<span class="hljs-number">0.0</span>);<br>    <span class="hljs-type">vec3</span> p10 = gridMinPos+<span class="hljs-type">vec3</span>(gridDeltaPos.x,<span class="hljs-number">0.0</span>,<span class="hljs-number">0.0</span>);<br>    <span class="hljs-type">vec3</span> p01 = gridMinPos+<span class="hljs-type">vec3</span>(<span class="hljs-number">0.0</span>,gridDeltaPos.y,<span class="hljs-number">0.0</span>);<br>    <span class="hljs-type">vec3</span> p11 = gridMinPos+<span class="hljs-type">vec3</span>(gridDeltaPos.x,gridDeltaPos.y,<span class="hljs-number">0.0</span>);<br><br>    <span class="hljs-type">vec3</span> dir00 = <span class="hljs-built_in">normalize</span>(worldPos-p00);<br>    <span class="hljs-type">vec3</span> dir01 = <span class="hljs-built_in">normalize</span>(worldPos-p01);<br>    <span class="hljs-type">vec3</span> dir10 = <span class="hljs-built_in">normalize</span>(worldPos-p10);<br>    <span class="hljs-type">vec3</span> dir11 = <span class="hljs-built_in">normalize</span>(worldPos-p11);<br><br>    <span class="hljs-type">vec3</span> grad00 = <span class="hljs-built_in">normalize</span>(randomVec2(p00));<br>    <span class="hljs-type">vec3</span> grad01 = <span class="hljs-built_in">normalize</span>(randomVec2(p01));<br>    <span class="hljs-type">vec3</span> grad10 = <span class="hljs-built_in">normalize</span>(randomVec2(p10));<br>    <span class="hljs-type">vec3</span> grad11 = <span class="hljs-built_in">normalize</span>(randomVec2(p11));<br>    <br>    <span class="hljs-type">float</span> noise00 = <span class="hljs-built_in">dot</span>(dir00,grad00);<br>    <span class="hljs-type">float</span> noise10 = <span class="hljs-built_in">dot</span>(dir10,grad10);<br>    <span class="hljs-type">float</span> noise01 = <span class="hljs-built_in">dot</span>(dir01,grad01);<br>    <span class="hljs-type">float</span> noise11 = <span class="hljs-built_in">dot</span>(dir11,grad11);<br><br>    <span class="hljs-type">float</span> noiseXIntp0 = lerp(noise00,noise10,gridDist.x);<br>    <span class="hljs-type">float</span> noiseXIntp1 = lerp(noise01,noise11,gridDist.x);<br>    <span class="hljs-type">float</span> noiseYIntp = lerp(noiseXIntp0,noiseXIntp1,gridDist.y);<br>    <span class="hljs-keyword">return</span> (noiseYIntp+<span class="hljs-number">1.0</span>)/<span class="hljs-number">2.0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>[1] <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/77596796">https://zhuanlan.zhihu.com/p/77596796</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/CS-Computer-Graphics/">#(CS)Computer Graphics</a>
+      
+        <a href="/tags/SE-WebGL/">#(SE)WebGL</a>
+      
+        <a href="/tags/MI-Leisure/">#(MI)Leisure</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>GLSL From Scratch 01 - Perlin噪声生成</div>
+      <div>https://aeroraven.github.io/2022/10/18/cg-glsl-1-perlin-noise/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>Aeroraven</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>October 18, 2022</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - Non-commercial">
+                    <i class="iconfont icon-nc"></i>
+                  </span>
+                </a>
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - Share-alike">
+                    <i class="iconfont icon-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/10/19/ml-leisure-1-diffusion/" title="Learning Diffusion Model">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Learning Diffusion Model</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/10/17/ml-intern-1-long-tail/" title="样本分布不平衡的问题的解决策略调研">
+                        <span class="hidden-mobile">样本分布不平衡的问题的解决策略调研</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        if (!window.MathJax) {
+          window.MathJax = {
+            tex    : {
+              inlineMath: { '[+]': [['$', '$']] }
+            },
+            loader : {
+              load: ['ui/lazy']
+            },
+            options: {
+              renderActions: {
+                insertedScript: [200, () => {
+                  document.querySelectorAll('mjx-container').forEach(node => {
+                    let target = node.parentNode;
+                    if (target.nodeName.toLowerCase() === 'li') {
+                      target.parentNode.classList.add('has-jax');
+                    }
+                  });
+                }, '', false]
+              }
+            }
+          };
+        } else {
+          MathJax.startup.document.state(0);
+          MathJax.texReset();
+          MathJax.typeset();
+          MathJax.typesetPromise();
+        }
+
+        Fluid.events.registerRefreshCallback(function() {
+          if ('MathJax' in window && MathJax.startup.document && typeof MathJax.startup.document.state === 'function') {
+            MathJax.startup.document.state(0);
+            MathJax.texReset();
+            MathJax.typeset();
+            MathJax.typesetPromise();
+          }
+        });
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.2/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

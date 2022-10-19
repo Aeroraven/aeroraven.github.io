@@ -18,13 +18,13 @@
   
     <meta name="description" content="对样本分布不平衡的问题的解决方法的相关论文调研">
 <meta property="og:type" content="article">
-<meta property="og:title" content="(ML&#x2F;CV) 样本分布不平衡的问题的解决策略调研">
+<meta property="og:title" content="样本分布不平衡的问题的解决策略调研">
 <meta property="og:url" content="https://aeroraven.github.io/2022/10/17/ml-intern-1-long-tail/index.html">
 <meta property="og:site_name" content="Aeroraven">
 <meta property="og:description" content="对样本分布不平衡的问题的解决方法的相关论文调研">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2022-10-16T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-10-17T15:22:11.925Z">
+<meta property="article:modified_time" content="2022-10-19T14:52:56.721Z">
 <meta property="article:author" content="Aeroraven">
 <meta property="article:tag" content="(CS)Computer Vision">
 <meta property="article:tag" content="(CS)Machine Learning">
@@ -33,7 +33,7 @@
   
   
   
-  <title>(ML/CV) 样本分布不平衡的问题的解决策略调研 - Aeroraven</title>
+  <title>样本分布不平衡的问题的解决策略调研 - Aeroraven</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -162,7 +162,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="(ML/CV) 样本分布不平衡的问题的解决策略调研"></span>
+            <span id="subtitle" data-typed-text="样本分布不平衡的问题的解决策略调研"></span>
           
         </div>
 
@@ -185,7 +185,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.1k words
+          8.5k words
         
       </span>
     
@@ -196,7 +196,7 @@
         
         
         
-          35 mins
+          71 mins
         
       </span>
     
@@ -234,12 +234,13 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">(ML/CV) 样本分布不平衡的问题的解决策略调研</h1>
+            <h1 style="display: none">样本分布不平衡的问题的解决策略调研</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="1-基于Re-weighting-Loss加权-的方法"><a href="#1-基于Re-weighting-Loss加权-的方法" class="headerlink" title="1. 基于Re-weighting (Loss加权) 的方法"></a>1. 基于Re-weighting (Loss加权) 的方法</h2><p>这一类方法通过修正不同类别的Loss权重，达成对长尾分布中尾部类别的补偿</p>
+                <h2 id="0-前言"><a href="#0-前言" class="headerlink" title="0. 前言"></a>0. 前言</h2><p>文中公式和文字内容可能有误</p>
+<h2 id="1-基于Re-weighting-Loss加权-的方法"><a href="#1-基于Re-weighting-Loss加权-的方法" class="headerlink" title="1. 基于Re-weighting (Loss加权) 的方法"></a>1. 基于Re-weighting (Loss加权) 的方法</h2><p>这一类方法通过修正不同类别的Loss权重，达成对长尾分布中尾部类别的补偿</p>
 <h3 id="1-1-Class-Balanced-Loss-Based-on-Effective-Number-of-Samples-CVPR2019"><a href="#1-1-Class-Balanced-Loss-Based-on-Effective-Number-of-Samples-CVPR2019" class="headerlink" title="1.1 Class-Balanced Loss Based on Effective Number of Samples (CVPR2019)"></a>1.1 Class-Balanced Loss Based on Effective Number of Samples (CVPR2019)</h3><h4 id="研究动机"><a href="#研究动机" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
 <li>解决长尾分布的通常方法包括重采样(Re-sampling)和Loss加权&#x2F;重加权(Re-weighting)两种方法。对于重采样，对头部分类(主要类别)欠采样可能导致丢弃有价值的样本，而过采样会导致引入重复样本，造成过拟合或者延长训练时间。因此Re-weighting的方法更好</li>
 <li>通常对Loss加权的权重 $w_i$反比与类别的$i$样本数量$c_i$，但是已有证明这样效果不好。因此，一种新的Re-weighting的方法对于处理长尾问题有价值</li>
@@ -270,7 +271,9 @@
 </ul>
 <h4 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h4><p><strong>PyTorch</strong>: <a target="_blank" rel="noopener" href="https://github.com/dvirsamuel/DRO-LT">https://github.com/dvirsamuel/DRO-LT</a></p>
 <h3 id="1-3-Asymmetric-Loss-For-Multi-Label-Classification-ICCV2021"><a href="#1-3-Asymmetric-Loss-For-Multi-Label-Classification-ICCV2021" class="headerlink" title="1.3 Asymmetric Loss For Multi-Label Classification (ICCV2021)"></a>1.3 Asymmetric Loss For Multi-Label Classification (ICCV2021)</h3><h4 id="研究动机-2"><a href="#研究动机-2" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>重采样方法不适用于多标签任务</li>
 <li>多任务语境下正负标签数量不均衡，一张图可能有几个Positive的标签，但是有很多Negative的标签。（Positive-negative imbalance）</li>
+<li>Focal Loss更聚焦于困难样本，因此有理由认为多任务中类似Focal-Loss的思路也有效果——使得模型更关注于困难的负样本(Hard Negative Samples)。但是Focal Loss中正负类别共用超参数可能不合理——在Positive-negative imbalance假设下，负样本数量更多，导致Focal Loss忽略数量少的正样本。基于正负样本的非对称性，作者认为具有改进空间。</li>
 </ul>
 <h4 id="主要贡献-2"><a href="#主要贡献-2" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
 <li>提出了基于Positive-negative imbalance和解决Groundtruth错误标签(Mis-labeling)的“非对称Loss” (Asymmetric Loss, ASL)</li>
@@ -278,17 +281,55 @@
 <li>在MS-COCO数据集上取得了更好的效果，且不需要花费额外推理和训练时间</li>
 </ul>
 <h4 id="算法定义"><a href="#算法定义" class="headerlink" title="算法定义"></a>算法定义</h4><p><strong>非对称聚焦</strong></p>
-<p>​	类比于Focal Loss的$\gamma$值，作者将其对正负样本解耦，即定义$\gamma_+$和$\gamma_-$，之后正类别Loss$L_+$和负类别Loss$L_-$定义为<br>$$<br>L_+&#x3D;(1-p)^{\gamma_+}\log(p);L_-&#x3D;p^{\gamma_-}\log(1-p)<br>$$<br>​	根据经验，有约束$\gamma_-&gt;\gamma_+$。解耦有效地降低了低概率情况下，负样本对</p>
+<p>​	类比于Focal Loss的$\gamma$值，作者将其对正负样本解耦，即定义$\gamma_+$和$\gamma_-$，之后正类别Loss$L_+$和负类别Loss$L_-$定义为<br>$$<br>L_+&#x3D;(1-p)^{\gamma_+}\log(p);L_-&#x3D;p^{\gamma_-}\log(1-p)<br>$$<br>​	根据正负样本不平衡的经验假设，有约束$\gamma_-&gt;\gamma_+$。在约束下，负样本的Loss权重衰减比正样本Loss衰减更大，帮助网络从正样本处学习特征，缓解正样本少造成学习情况不佳的问题。</p>
 <p><strong>非对称概率分布偏移</strong></p>
-<p>​	由于多标签分类中的不平衡程度可能非常高，因此这种衰减(非对称聚焦)并不总是足够的。基于此，作者提出了额外的非对称机制，即非对称概率偏移。记偏移后的概率是$p_m$，则<br>$$<br>p_m&#x3D;\max(p-m,0)<br>$$<br><strong>ASL定义</strong></p>
+<p>​	由于多标签分类中的不平衡程度可能非常高，因此这种衰减(非对称聚焦)并不总是足够的。基于此，作者提出了额外的非对称机制，即非对称概率偏移。记偏移后的概率是$p_m$，则<br>$$<br>p_m&#x3D;\max(p-m,0)<br>$$<br>​	定义中$m\geq 0$是可调超参数。</p>
+<p>​	偏移后，网络在对低概率负样本(Easy Negative Sample)预测时，其对Loss的贡献被直接丢弃，从而进一步使得网络关注正样本。</p>
+<p><strong>ASL定义</strong></p>
 <p>​	基于以上的非对称机制，可以定义ASL函数，即<br>$$<br>L_+&#x3D;(1-p)^{\gamma_+}\log(p);L_-&#x3D;p^{\gamma_-}_m\log(1-p_m)<br>$$</p>
+<p>​	ASL具有三个超参数：$\gamma_+,\gamma_-,m$，由于作者基于正样本数小于负样本数量的假设，因此要求不高时，正样本Loss不需要衰减，直接使用交叉熵即可($\gamma_+&#x3D;0$)。基于这三个参数，ASL提供三种机制解决正负不平衡问题。</p>
+<ul>
+<li>(A) Hard thresholding：对于负样本$p&lt;m$，直接丢弃这些简单负样本（使得网络关注困难样本）</li>
+<li>(B) Soft thresholding：对于负样本$p&gt;m$，Loss具有一定衰减</li>
+<li>(C) Mislabeld：即非常困难的负样本(Hard negative)，认为是错误标记，此时其对Loss贡献值为0</li>
+</ul>
+<p>​	梯度分析中的，负样本ASL函数类似于负偏态分布函数(?)，即$p$小时，Loss小，$p$大时Loss梯度大，$p$接近于1时，认为错误样本，此时Loss梯度仍然很小</p>
+<p><strong>自适应非对称性调整</strong></p>
+<p>​	ASL的几个超参数描述了正负样本的非对称性，作者提出了自适应调整这些参数的方法。即每一个Epoch后，更新一次$\gamma_-$<br>$$<br>\gamma_-\gets\gamma_-+\lambda(\Delta p-\Delta p_{target})<br>$$<br>​	其中$\Delta p$是平均的正样本概率与负样本概率差值。</p>
 <h4 id="实验结果-1"><a href="#实验结果-1" class="headerlink" title="实验结果"></a>实验结果</h4><p>​	在MS-COCO数据集上较原有的SOTA模型，mAP提高2.8%；Pascal-VOC上，较原有SOTA模型，mAP提高0.6%；</p>
 <h4 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h4><p><strong>PyTorch</strong>： <a target="_blank" rel="noopener" href="https://github.com/Alibaba-MIIL/ASL">https://github.com/Alibaba-MIIL/ASL</a></p>
-<h2 id="2-基于Re-sample-重采样-的方法"><a href="#2-基于Re-sample-重采样-的方法" class="headerlink" title="2. 基于Re-sample (重采样) 的方法"></a>2. 基于Re-sample (重采样) 的方法</h2><p>这一类方法通过修正采样时不同类别的采样概率，达成对长尾分布中尾部类别的补偿</p>
-<h3 id="2-1-Decoupling-representation-and-classifier-for-long-tailed-recognition-ICLR2020"><a href="#2-1-Decoupling-representation-and-classifier-for-long-tailed-recognition-ICLR2020" class="headerlink" title="2.1 Decoupling representation and classifier for long-tailed recognition (ICLR2020)"></a>2.1 Decoupling representation and classifier for long-tailed recognition (ICLR2020)</h3><h4 id="研究动机-3"><a href="#研究动机-3" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
-<li>已有研究缺乏对长尾学习效果的分析——一个好的模型来自于其更好的表征，还是通过对分类器中决策边界的移动达到对不平衡类别更好的效果。因此作者将模型训练拆成了特征学习和分类两部分，进行实验。</li>
+<h3 id="1-4-Distribution-Balanced-Loss-for-Multi-Label-Classification-in-Long-Tailed-Datasets-ECCV2020"><a href="#1-4-Distribution-Balanced-Loss-for-Multi-Label-Classification-in-Long-Tailed-Datasets-ECCV2020" class="headerlink" title="1.4 Distribution-Balanced Loss for Multi-Label Classification in Long-Tailed Datasets (ECCV2020)"></a>1.4 Distribution-Balanced Loss for Multi-Label Classification in Long-Tailed Datasets (ECCV2020)</h3><h4 id="研究动机-3"><a href="#研究动机-3" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>已有的多标签学习方法（如使用BCELoss、在Loss前加一个反比与类别中样本数的系数）忽略了多标签数据集的两个重要特征，即标签共存（Label co-occurrence，一个样本中具有多个标签）和负标签支配（Dominance of negative labels，即大多数样本中仅有少数正标签，大多数为负标签，对于尾部类别而言，该现象更严重。这一假设和论文Asymmetric Loss For Multi-Label Classification相同）<ul>
+<li>标签共存问题造成MLD的重采样难以进行，一般重采样方法很难按照类别对采样进行平衡</li>
+<li>负标签支配问题造成Loss中对负样本施加更大的惩罚项，从而导致正样本被忽略的问题（尤其是长尾分布中的尾部类别），作者将这种现象定义为负标签过抑制（over-suppression of negative labels)</li>
+</ul>
+</li>
+<li>基于上述两个问题，可以导出两个优化方向<ul>
+<li>在Loss中添加一个系数项，补偿由于采样造成的不平衡问题（即Rebalance Weighting）。通过这一项补偿某个样本预期采样次数和实际采样次数之间的差距</li>
+<li>在Loss中引入抗负样本的正则化项目，避免原有Loss对负样本施加过大惩罚。</li>
+</ul>
+</li>
 </ul>
 <h4 id="主要贡献-3"><a href="#主要贡献-3" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
+<li>针对重采样困难和M正负样本失衡这两个MLD中常见非对称问题，对BCELoss引入两个修正项，进而提出Distribution-Balanced Loss(DBL)函数。基于消融实验，证明两个修正项的有效性。</li>
+<li>使用DBL，在VOC-MLT和COCO-MLT等数据集上取得比原有SOTA模型更好的结果</li>
+</ul>
+<h4 id="算法定义-1"><a href="#算法定义-1" class="headerlink" title="算法定义"></a>算法定义</h4><p><strong>重采样后的重平衡赋权(Re-balancing Weighting)</strong></p>
+<p>​	以Class-aware的采样方法为例，设随机选取一个类别的样本，该样本有标签$i$的概率是$\hat{p_i}$，$C$是总标签数量，$n_x$表示满足标签条件$x$的样本数量。$\hat{p_i}$等于<br>$$<br>\hat{p_i}&#x3D;\frac{1}{C}\sum_{j&#x3D;1}^C\frac{n_{i\cap j}}{n_j}<br>$$<br>​	定义按照Class-aware方法，不考虑标签重叠（Label co-occurrence）时，一个具有标签$i$的样本$x^k$被采样到概率记作<br>$$<br>P^C_i(x^k)&#x3D;\frac{1}{Cn_i}<br>$$<br>​	引入Label co-occurrence后，样本被采样到的概率记作$P^I(x^k)$<br>$$<br>P^I(x^k)&#x3D;\frac{1}{C}\sum_{y_i^k&#x3D;1}\frac{1}{n_i}<br>$$<br>​	实际采样概率$P^I$和期望采样概率$P^C_i$之间的差距记作$r^k_i$，有<br>$$<br>r^k_i&#x3D;\frac{P^C_i(x^k)}{P^I(x^k)}<br>$$<br>​	避免极端情况下参数取值极端，用类Sigmoid的函数对$r^k_i$规范化<br>$$<br>\hat{r^k_i}&#x3D;\alpha+sigmoid(-\beta(r_i^k-\mu))<br>$$<br>​	之后导出重平衡赋权后的BCELoss，即在每一类后面乘一个$\hat{r_i^k}$<br>$$<br>L_{R-BCE}(x^k,y^k)&#x3D;\frac{1}{C}\sum_{i&#x3D;0}^C\left(y_i^k\log(1+\exp(z^k_i))+(1-y_i^k)\log(1+\exp(-z^k_i))\right)\hat{r_i^k}<br>$$<br><strong>抗负样本的正则化项</strong><br>$$<br>L_{NT-BCE}(x^k,y^k)&#x3D;\frac{1}{C}\sum_{i&#x3D;0}^C\left(y_i^k\log(1+\exp(z^k_i-v_i)+\frac{1}{\lambda}(1-y_i^k)\log(1+\exp(-\lambda(z^k_i-v_i))\right)<br>$$<br>​	其中参数$\lambda$控制抗负样本的程度（值越大，同样的负Logit对应的梯度值越小，Loss函数在接近Logit&#x3D;0处越陡）</p>
+<p>​	关于另一个参数$v_i$，作者给出解释如下：</p>
+<blockquote>
+<p>​	可以理解为，给每个类别的输出添加一个随样本频率递增的额外 bias （也相当于初始化），因为即使不这样，训练集的样本分布也会自然让网络学出一个不均衡的全连接层偏置量，手动初始化 bias 可以把这种本征概率分布 encode 进学习过程中，便于网络更多地学习频率分布之外的类别特征。</p>
+</blockquote>
+<p><strong>DBLoss</strong></p>
+<p>​	综合上述两个Loss，得到最终Loss<br>$$<br>L_{NT-BCE}(x^k,y^k)&#x3D;\frac{1}{C}\sum_{i&#x3D;0}^C\left(y_i^k\log(1+\exp(z^k_i-v_i)+\frac{1}{\lambda}(1-y_i^k)\log(1+\exp(-\lambda(z^k_i-v_i))\right)\hat{r_i^k}<br>$$</p>
+<h4 id="实验结果-2"><a href="#实验结果-2" class="headerlink" title="实验结果"></a>实验结果</h4><p>VOCMLT上Tail类别高5.34%，总共高2.49%。COCOMLT上表现也很好</p>
+<h4 id="代码-3"><a href="#代码-3" class="headerlink" title="代码"></a>代码</h4><p><strong>PyTorch</strong>  <a target="_blank" rel="noopener" href="https://github.com/wutong16/DistributionBalancedLoss">https://github.com/wutong16/DistributionBalancedLoss</a></p>
+<h4 id="论文地址"><a href="#论文地址" class="headerlink" title="论文地址"></a>论文地址</h4><p>Distribution-Balanced Loss for Multi-Label Classification in Long-Tailed Datasets<br><a target="_blank" rel="noopener" href="https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123490154.pdf">https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123490154.pdf</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/187552464">https://zhuanlan.zhihu.com/p/187552464</a></p>
+<h2 id="2-基于Re-sample-重采样-的方法"><a href="#2-基于Re-sample-重采样-的方法" class="headerlink" title="2. 基于Re-sample (重采样) 的方法"></a>2. 基于Re-sample (重采样) 的方法</h2><p>这一类方法通过修正采样时不同类别的采样概率，达成对长尾分布中尾部类别的补偿</p>
+<h3 id="2-1-Decoupling-representation-and-classifier-for-long-tailed-recognition-ICLR2020"><a href="#2-1-Decoupling-representation-and-classifier-for-long-tailed-recognition-ICLR2020" class="headerlink" title="2.1 Decoupling representation and classifier for long-tailed recognition (ICLR2020)"></a>2.1 Decoupling representation and classifier for long-tailed recognition (ICLR2020)</h3><h4 id="研究动机-4"><a href="#研究动机-4" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>已有研究缺乏对长尾学习效果的分析——一个好的模型来自于其更好的表征，还是通过对分类器中决策边界的移动达到对不平衡类别更好的效果。因此作者将模型训练拆成了特征学习和分类两部分，进行实验。</li>
+</ul>
+<h4 id="主要贡献-4"><a href="#主要贡献-4" class="headerlink" title="主要贡献"></a>主要贡献</h4><ul>
 <li>全程对分类器按照Class-balanced的方式采样（即每一个类别采样概率相同），效果不一定好。</li>
 <li>对一个训练好的Joint Model（即原有模型，包括特征提取部分+分类器）的分类器按Class-Balanced进行Retrain效果更好。</li>
 <li>将这个训练策略应用到常见模型上，在ImageNet-LT，Places-LT，iNaturalist上效果超出已有的SOTA模型</li>
@@ -302,7 +343,33 @@
 <li>**最近类别均值分类器 Nearset Class Mean classifier (NCM)**：先使用训练集计算出个类别的中心 feature tensor，然后每次做预测的时候使用 cosine similarity或者 MSE loss计算出每个样本离这些中心feature的距离。</li>
 <li><strong>τ-normalized classifier</strong> ：给最后一层的分类器加上正则限制，防止其都预测成类别多的那类。即对第$i$类的分类器参数$w_i$除以$w_i$对的$\tau$范数</li>
 </ul>
-<h4 id="实验结果-2"><a href="#实验结果-2" class="headerlink" title="实验结果"></a>实验结果</h4><p>对于长尾类别，使用Instance-balanced的方法对联合模型训练完后，使用cRT或者τ-norm的方法进行分类器调整效果最好，提高的精确度达到25%左右；对于整体，准确率提升在5%左右。</p>
+<h4 id="实验结果-3"><a href="#实验结果-3" class="headerlink" title="实验结果"></a>实验结果</h4><p>对于长尾类别，使用Instance-balanced的方法对联合模型训练完后，使用cRT或者τ-norm的方法进行分类器调整效果最好，提高的精确度达到25%左右；对于整体，准确率提升在5%左右。</p>
+<h2 id="3-其他"><a href="#3-其他" class="headerlink" title="3. 其他"></a>3. 其他</h2><h3 id="Just-Pick-a-Sign-Optimizing-Deep-Multitask-Models-with-Gradient-Sign-Dropout"><a href="#Just-Pick-a-Sign-Optimizing-Deep-Multitask-Models-with-Gradient-Sign-Dropout" class="headerlink" title="Just Pick a Sign: Optimizing Deep Multitask Models with Gradient Sign Dropout"></a>Just Pick a Sign: Optimizing Deep Multitask Models with Gradient Sign Dropout</h3><h4 id="研究动机-5"><a href="#研究动机-5" class="headerlink" title="研究动机"></a>研究动机</h4><ul>
+<li>梯度更新得到的局部最优时的参数，通常是较优的。对于多任务的loss平面，每一个任务成分的loss最小值一般在不同的网络参数下取得。因此直接loss加和后更新网络效果可能不好。因此使用联合loss最小值(joint minima)——即一个靠近于所有成分的loss最小值点的临界点上。</li>
+<li>放任多个多个不同符号梯度值更新一个标量会出现tug-of-wars(拔河)的现象，结果不好。因此所有在一个位置上的梯度更新保证符号相同(pure in sign)</li>
+<li>梯度随机和模型鲁棒性具有关系。当一个网络找到一个低质量的最小值时，其中批梯度更新内在的噪声会讲模型更新到一个更鲁棒的最小值。因此在梯度(符号?)冲突更大的方向上引入随机性会更好</li>
+</ul>
+<h4 id="提出算法"><a href="#提出算法" class="headerlink" title="提出算法"></a>提出算法</h4><ul>
+<li>在网络负责预测的Head前引入一个Gradient Sign Dropout层。</li>
+<li>定义正向梯度符号纯度P(Gradient Positive Sign Purity)，为正向梯度和与所有梯度绝对值和的比值*0.5+0.5</li>
+<li>之后对每一个梯度Mi应用如下的Mask</li>
+</ul>
+<p>$$<br>    M_i&#x3D;I(f(P)&gt;U) * I(L_i&gt;0) + I(f(P)&lt;U) * I(L_i&lt;0)<br>$$</p>
+<p>其中U满足(0,1)上的均匀分布，L_i是梯度分量，I是指示函数，f是单调递增函数（通常f(x)&#x3D;x）。之后按照权重M_i对L_i加权求和得到最终梯度。</p>
+<ul>
+<li>将GradDrop扩展到batch-separated的梯度上。考虑一个激活层A，则将上述算法中的L_i更改为sgn(A)与Li对A梯度的乘积。</li>
+</ul>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><ul>
+<li>在CelebA数据集<ul>
+<li>错误率较Baseline低0.19%，较原有SOTA?低0.08%</li>
+<li>F1较Baseline高0.22，较原有SOTA?高0.15</li>
+<li>时间消耗上仅为原有Baseline的45%</li>
+</ul>
+</li>
+<li>从ImageNet2012到CIFAR-10的迁移学习Loss低于MixedBatch有0.21，错误率低1%</li>
+<li>Waymo数据集上结果也有提升</li>
+</ul>
+<h4 id="代码和论文"><a href="#代码和论文" class="headerlink" title="代码和论文"></a>代码和论文</h4><p><a target="_blank" rel="noopener" href="https://github.com/tensorflow/lingvo/blob/master/lingvo/core/graddrop.py">https://github.com/tensorflow/lingvo/blob/master/lingvo/core/graddrop.py</a><br><a target="_blank" rel="noopener" href="https://paperswithcode.com/paper/just-pick-a-sign-optimizing-deep-multitask">https://paperswithcode.com/paper/just-pick-a-sign-optimizing-deep-multitask</a></p>
 
                 
               </div>
@@ -331,7 +398,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>(ML/CV) 样本分布不平衡的问题的解决策略调研</div>
+      <div>样本分布不平衡的问题的解决策略调研</div>
       <div>https://aeroraven.github.io/2022/10/17/ml-intern-1-long-tail/</div>
     </div>
     <div class="license-meta">
@@ -388,12 +455,18 @@
                   <article class="post-prev col-6">
                     
                     
+                      <a href="/2022/10/18/cg-glsl-1-perlin-noise/" title="GLSL From Scratch 01 - Perlin噪声生成">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">GLSL From Scratch 01 - Perlin噪声生成</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/02/23/cg-course-1-raytracing/" title="(CG) 基于WebGL实现的光线追踪渲染">
-                        <span class="hidden-mobile">(CG) 基于WebGL实现的光线追踪渲染</span>
+                      <a href="/2022/02/23/cg-course-1-raytracing/" title="基于WebGL实现的光线追踪渲染">
+                        <span class="hidden-mobile">基于WebGL实现的光线追踪渲染</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
