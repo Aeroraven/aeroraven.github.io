@@ -82,8 +82,8 @@ void main(){
     gl_Position = uProj*uModelView*uLocalMat*v;
     gl_PointSize = pSize;
 
-    vLT = rLT;
-    vLB = rLB;
-    vRT = rRT;
-    vRB = rRB;
+    vLT = pLT;
+    vLB = pLB;
+    vRT = pRT;
+    vRB = pRB;
 }

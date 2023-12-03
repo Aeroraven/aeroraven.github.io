@@ -11,7 +11,7 @@ uniform vec3 uRef;
 uniform float useDot;
 
 void main(){
-    vec4 edgA = vRT - vLT;
+    vec4 edgA = vLT-vRT;
     vec4 edgB = vLB - vRT;
     vec3 n = normalize(cross(edgA.xyz, edgB.xyz));
     float d = abs(dot(n,normalize(uRef.xyz)));
